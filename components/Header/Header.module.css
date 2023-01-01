@@ -1,0 +1,13 @@
+#header {
+    position: sticky;
+    z-index: 999;
+    background: var(--bg-header);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
+    padding-bottom: 5px;
+    margin-bottom: 1rem;
+    top: 0;
+}
