@@ -13,6 +13,10 @@
     --text-color-primary: #F8F8FF;
     --text-color-date: lightgrey;
     --text-color-article-heading: #FFE4E1;
+    --text-color-article-link: aqua;
+    --scrollbar-color: #1f1f1f;
+    --scrollbar-thumb-color: #444;
+    --scrollbar-thumb-color-hover: #555;
 }
 
 #app[data-theme="light"] {
@@ -21,6 +25,10 @@
     --text-color-primary: black;
     --text-color-date: grey;
     --text-color-article-heading: #0693e3;
+    --text-color-article-link: aqua;
+    --scrollbar-color: lightgrey;
+    --scrollbar-thumb-color: #8f8f8f;
+    --scrollbar-thumb-color-hover: #555;
 }
 
 #app {
@@ -29,6 +37,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, 
         Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     transition: background-color 0.3s ease;
+    padding-bottom: 3rem;
 }
 
 a {
@@ -70,4 +79,23 @@ body {
     padding-left: 32px;
     padding-right: 32px;
     min-height: 100vh;
+}
+
+#app ::-webkit-scrollbar {
+    width: 10px;
+    height: 7px;
+    background: var(--scrollbar-color);
+}
+
+#app ::-webkit-scrollbar-track {
+    background: var(--scrollbar-color);
+}   
+
+#app ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb-color);
+    border-radius: 5px;
+}
+
+#app ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-color-hover);
 }
