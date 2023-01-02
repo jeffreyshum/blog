@@ -1,0 +1,19 @@
+#footer {
+    background: var(--bg-footer);
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    font-size: var(--font-size-footer);
+    margin-top: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 3rem;
+}
+
+#socialContainer {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.socialIcon {
+    height: 3rem;
+}

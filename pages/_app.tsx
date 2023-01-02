@@ -3,6 +3,7 @@ import "../styles/globals.css"
 import "../styles/prism-one-dark.scss"
 import "../styles/prism-one-light.scss"
 import Header from "../components/Header"
+import Footer from "../components/Footer"
 
 const App = ({ Component, pageProps }: AppProps) => {
 	return (
@@ -12,6 +13,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 				<div id="content">
 					<Component {...pageProps} />
 				</div>
+				<Footer />
 			</div>
 		</>
 	)
