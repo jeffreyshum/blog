@@ -26,6 +26,16 @@
     color: var(--text-color-article-heading);
 }
 
+#article a {
+    color: var(--text-color-article-link);
+    border-bottom: 1px solid transparent;
+    transition: 0.3s;
+}
+
+#article a:hover {
+    border-color: var(--text-color-article-link);
+}
+
 #article img {
     width: 100%;
     max-height: 20vh;
@@ -48,6 +58,7 @@
 
 #description {
     text-align: center;
+    margin-bottom: 0.5rem;
 }
 
 #date {
