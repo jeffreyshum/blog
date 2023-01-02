@@ -15,9 +15,7 @@ export interface PostPageProps {
 	frontmatter: FrontMatter
 }
 
-export interface PostPageParams extends ParsedUrlQuery {
-	name: string
-}
+export interface PostPageParams extends ParsedUrlQuery {}
 
 export interface FrontMatter {
 	title: string
