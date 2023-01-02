@@ -1,0 +1,239 @@
+---
+title: "Devlog #0 - Genesis"
+author: "Jeffrey Shum"
+description: "The first devlog of 2023. This week, we navigate through the core systems that render posts like this one, along with describing the process of creating a blog in NextJS."
+originalDate: "2023-01-03EST"
+keywords: "devlog"
+subject: "devlog"
+---
+
+# Why a Blog?
+
+In the modern age, information races in and out of our heads at an alarming rate.
+In recent years, the trend towards short-form content has unquestionably taken over the internet.
+Perhaps you have found yourself quickly tapping through your Instagram story feed only to quickly swipe back because something caught your eye.
+Or maybe you're like me and you're swiping through TikToks or Youtube Shorts to find something you want to watch only to instinctively swipe away right as it gets good
+(of course, swippng back and watching it from the beginning again).
+Blogs seem to have lost their place on the internet, at least for the average person.
+
+Yet a blog, coupled with modern web development (love it or hate it), can create an unparalleled method of demonstrating information.
+Think of blogs as the middle ground between a book, where content is static and referencable, and a video, where content is visual and often more engaging.
+With React (and other modern web frameworks), creating interactive and modular components is made easy.
+MDX, an extended format of Markdown, makes it easy to write content while still being able to use our React components.
+Josh W. Comeau goes into more detail about the power of MDX in his blog post, [How I Built my Blog](https://www.joshwcomeau.com/blog/how-i-built-my-blog/).
+Couple these technologies with NextJS and its server-side rendering, and you have a powerful stack for creating a blog that stands out from the rest.
+The rest of this post will go into detail on the core code that takes an MDX file and renders it into a blog post.
+
+# mdx-bundler
+
+The library that makes this all possible is [mdx-bundler](https://github.com/kentcdodds/mdx-bundler), built by the famous Kent C. Dodds.
+mdx-bundler provides an asynchronous function that takes in an MDX string and returns a renderable React component.
+
+```ts
+import { useMemo } from "react"
+import { getMDXComponent } from "mdx-bundler/client"
+
+// Example from mdx-bundler README
+// code is an MDX string, which we pass as a prop to our page
+// Component is the React component that we render on our page
+const Component = useMemo(() => getMDXComponent(code), [code])
+```
+
+Since we are passing in an MDX string, we need a way to get said MDX string from an MDX file.
+Luckily for us, mdx-bundler provides a sister function that takes in a source and returns its associated MDX string.
+We will use this function in our page's associated getStaticProps function (more on this later).
+
+```ts
+import { bundleMDX } from "mdx-bundler"
+import fs from "fs"
+
+// we can also pass the file itself to bundleMDX,
+// but we will use a raw string for now
+const file = fs.readFileSync(fileName).toString()
+
+// code is what is passed to our page
+// frontmatter is metadata about the MDX file, which we will define later
+const { code, frontmatter } = await bundleMDX({
+	source: file,
+})
+```
+
+# Building the Page
+
+Now that we have a way to get a renderable component from an MDX file, we need a place to render it.
+Since each post is itself a unique page, we will use NextJS's [dynamic routes](https://nextjs.org/docs/routing/dynamic-routes).
+Dynamic routes allow us to create a page for each post, and we can use the file name as the URL route.
+
+But first, let's create some useful interfaces for TypeScript to work its magic.
+
+```ts
+export interface FrontMatter {
+	title: string
+	author: string
+	description: string
+	originalDate: string
+	keywords: string
+	editDate?: string
+	category: string
+}
+
+export interface PostPageProps {
+	code: string
+	frontmatter: Frontmatter
+}
+
+export interface PostPageParams extends ParsedUrlQuery {}
+```
+
+Now that our interfaces have been declared, the purpose of frontmatter is much more apparent.
+Frontmatter is a way to easily store and retrieve metadata about a post, such as a title, author, and description.
+In our MDX, we can put the following at the top of every file:
+
+```md
+---
+title: "Devlog #0 - Genesis"
+author: "Jeffrey Shum"
+description: "The first devlog of 2023. This week, we navigate through the core systems that render posts like this one, along with describing the process of creating a blog in NextJS."
+originalDate: "2023-01-03EST"
+keywords: "devlog"
+subject: "devlog"
+---
+```
+
+Now, recall that we destructured two properties from the return value of bundleMDX, **code** and **frontmatter**.
+mdx-bundler will parse the frontmatter we declare in our files and return it as a JavaScript object.
+Let's give those types as well.
+
+```ts
+const { code, frontmatter }: { code: string; frontmatter: FrontMatter } =
+	await bundleMDX({ source: file })
+```
+
+Now that we have our code and frontmatter, we can pass them as props to our page.
+To do this for a statically generated page in NextJS, we will have to define two functions: **getStaticPaths** and **getStaticProps**.
+
+```ts
+import fs from "fs"
+import { GetStaticPaths, GetStaticProps } from "next"
+
+export const getStaticProps: GetStaticProps<
+	PostPageProps,
+	PostPageParams
+> = async ({ params }) => {
+	const { post } = params!
+
+	// fetch the associated mdx file
+	const fileName = `posts/${post}.mdx`
+	const file = fs.readFileSync(fileName).toString()
+
+	// bundleMDX
+	const { code, frontmatter }: { code: string; frontmatter: FrontMatter } =
+		await bundleMDX({ source: file })
+
+	// pass it to our page
+	return {
+		props: {
+			code,
+			frontmatter,
+		},
+	}
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+	// get all files in our posts directory
+	const posts = fs.readdirSync("posts")
+
+	// create a path for each file
+	return {
+		paths: posts.map((post) => ({
+			params: { post: post.replace(".mdx", "") },
+		})),
+		fallback: false,
+	}
+}
+```
+
+Now that we have our paths and props, we can create our page.
+
+```tsx
+import { NextPage } from "next"
+import { useMemo } from "react"
+import { getMDXComponent } from "mdx-bundler/client"
+import Head from "next/head"
+
+const PostPage: NextPage<PostPageProps> = ({ code, frontmatter }) => {
+	const Component = useMemo(() => getMDXComponent(code), [code])
+
+	return (
+		<>
+			<Head>
+				<title>{frontmatter.title}</title>
+				<meta name="description" content={frontmatter.description} />
+				<meta name="keywords" content={frontmatter.keywords} />
+				<meta name="author" content={frontmatter.author} />
+				<meta name="og:title" content={frontmatter.title} />
+				<meta name="og:description" content={frontmatter.description} />
+				<meta name="og:type" content="article" />
+			</Head>
+			<article>
+				<div>
+					<h1>{frontmatter.title}</h1>
+					<p>{frontmatter.description}</p>
+					<time
+						dateTime={
+							frontmatter.editDate || frontmatter.originalDate
+						}
+					>
+						Updated:{" "}
+						{new Date(
+							frontmatter.editDate || frontmatter.originalDate
+						).toLocaleDateString("en-US", {
+							year: "numeric",
+							month: "short",
+							day: "numeric",
+						})}
+					</time>
+				</div>
+				<hr />
+				<Component />
+			</article>
+		</>
+	)
+}
+
+export default PostPage
+```
+
+# Plugins
+
+Now that we have a way to render MDX files as pages, we can add plugins to make our lives easier.
+For example, to format code blocks, we can use [rehype-prism-plus](https://github.com/timlrx/rehype-prism-plus).
+We can then provide **rehypePrism** as a plugin to mdx-bundler by providing an **mdxOptions** function as a parameter in our object.
+
+```ts
+const { code, frontmatter }: { code: string; frontmatter: FrontMatter } =
+	await bundleMDX({
+		source: file,
+		mdxOptions(options) {
+			options.rehypePlugins = [
+				// ensure that any existing plugins are included
+				...(options.rehypePlugins ?? []),
+				// append all our plugins here
+				rehypePrism,
+			]
+			return options
+		},
+	})
+```
+
+We can include any rehype or remark plugins in this way.
+For example, this site currently also uses [rehype-katex](https://github.com/remarkjs/remark-math/tree/main)
+for rendering math expressions like $a^2 + b^2 = c^2$, and
+[remarkMath](https://github.com/remarkjs/remark-math/tree/main) for parsing math in MDX.
+Note that plugins may require additional stylesheets to be included in your project.
+
+# In the Next Episode
+
+In the next episode, we will build up from this core system and add a few more features to this blog.
+
+Until then. Happy New Year!
