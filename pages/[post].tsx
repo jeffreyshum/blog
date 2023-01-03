@@ -9,6 +9,7 @@ import { bundleMDX } from "mdx-bundler"
 import rehypePrism from "rehype-prism-plus"
 import rehypeKatex from "rehype-katex"
 import remarkMath from "remark-math"
+import ArticleComponents from "../components/ArticleComponents"
 
 export interface PostPageProps {
 	code: string
@@ -62,7 +63,7 @@ const PostPage: NextPage<PostPageProps> = ({ code, frontmatter }) => {
 					</time>
 				</div>
 				<hr />
-				<Component />
+				<Component components={ArticleComponents} />
 			</article>
 		</>
 	)
