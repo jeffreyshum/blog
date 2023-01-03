@@ -1,42 +1,42 @@
-#article p {
+#article > p {
     font-size: var(--font-size-article-text);
     margin-top: 1rem;
 }
 
-#article h1, #article h2, #article h3 {
+#article > h1, #article > h2, #article > h3 {
     color: var(--text-color-article-heading);
     margin-top: 1rem;
 }
 
-#article h1 {
+#article > h1 {
     font-size: var(--font-size-article-h1);
 }
 
-#article h2 {
+#article > h2 {
     font-size: calc(var(--font-size-article-h1) * 0.8);
 }
 
-#article h3 {
+#article > h3 {
     font-size: calc(var(--font-size-article-h1) * 0.6);
 }
 
 /* There should be no need for heading sizes 4-6. This is ensured by forced sizing. */
-#article h4, #article h5, #article h6 {
+#article > h4, #article > h5, #article > h6 {
     font-size: calc(var(--font-size-article-h1) * 0.6);
     color: var(--text-color-article-heading);
 }
 
-#article a {
+#article > p > a {
     color: var(--text-color-article-link);
     border-bottom: 1px solid transparent;
     transition: 0.3s;
 }
 
-#article a:hover {
+#article > p >a:hover {
     border-color: var(--text-color-article-link);
 }
 
-#article img {
+#article > p > img {
     width: 100%;
     max-height: 20vh;
     object-fit: contain;
