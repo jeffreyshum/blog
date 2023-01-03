@@ -1,0 +1,8 @@
+.button {
+    background-color: inherit;
+    border: none;
+}
+
+.button:hover {
+    cursor: pointer;
+}
