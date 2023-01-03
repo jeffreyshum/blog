@@ -6,3 +6,7 @@
 .button:hover {
     cursor: pointer;
 }
+
+.image {
+    height: 2rem;
+}

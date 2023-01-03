@@ -23,6 +23,7 @@ const ThemeButton: FC = () => {
 				src={`/images/icons/${theme}.png`}
 				alt="toggle-theme-button"
 				title="Toggle Theme"
+				className={styles.image}
 			/>
 		</button>
 	)
