@@ -23,7 +23,7 @@ const Footer: FC = () => {
 					/>
 				</a>
 				<a
-					href="https://www.linkedin.com/in/jeffrey-shum/"
+					href="https://www.linkedin.com/in/shumjeffrey/"
 					target="_blank"
 					rel="noopener noreferrer"
 				>
@@ -35,7 +35,7 @@ const Footer: FC = () => {
 					/>
 				</a>
 				<a
-					href="https://www.instagram.com/jeffreyshum/"
+					href="https://www.instagram.com/jeffreyshum_/"
 					target="_blank"
 					rel="noopener noreferrer"
 				>
