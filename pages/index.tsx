@@ -3,6 +3,7 @@ import fs from "fs"
 import matter from "gray-matter"
 import RecentPostCard from "../components/RecentPostCard"
 import styles from "../styles/index.module.css"
+import Head from "next/head"
 
 export interface IndexProps {
 	recentPosts: Array<Post>
@@ -20,6 +21,14 @@ export interface Post {
 const Index: NextPage<IndexProps> = ({ recentPosts }) => {
 	return (
 		<>
+			<Head>
+				<title>Jeffrey Shum - Blog</title>
+				<meta name="description" content="Jeffrey Shum's Blog" />
+				<meta name="keywords" content="Jeffrey Shum, Blog" />
+				<meta name="author" content="Jeffrey Shum" />
+				<meta name="og:title" content="Jeffrey Shum - Blog" />
+				<meta name="og:description" content="Jeffrey Shum's Blog" />
+			</Head>
 			<div className={styles.title}>
 				<h1>Recent Posts</h1>
 			</div>
@@ -37,7 +46,6 @@ export const getStaticProps: GetStaticProps = async () => {
 
 	const posts = fs.readdirSync("posts")
 
-	console.log(posts.length)
 	posts.forEach((post) => {
 		const frontMatter = matter(fs.readFileSync(`posts/${post}`).toString())
 
@@ -51,7 +59,6 @@ export const getStaticProps: GetStaticProps = async () => {
 		})
 	})
 
-	console.log(recentPosts)
 	// sort posts by date
 	recentPosts.sort((a, b) => {
 		const dateA = new Date(a.originalDate)
@@ -62,7 +69,6 @@ export const getStaticProps: GetStaticProps = async () => {
 		return 0
 	})
 
-	console.log(recentPosts)
 	return {
 		props: {
 			recentPosts: recentPosts,
