@@ -32,7 +32,7 @@
     transition: 0.3s;
 }
 
-#article > p >a:hover {
+#article > p > a:hover {
     border-color: var(--text-color-article-link);
 }
 
