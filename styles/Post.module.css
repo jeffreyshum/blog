@@ -29,7 +29,7 @@
 #article > p > a {
     color: var(--text-color-article-link);
     border-bottom: 1px solid transparent;
-    transition: 0.3s;
+    transition: var(--theme-change-transition);
 }
 
 #article > p > a:hover {
