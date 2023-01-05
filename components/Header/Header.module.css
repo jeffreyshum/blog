@@ -30,3 +30,16 @@
     padding-right: 4rem;
     height: 100%;
 }
+
+.navLink {
+    font-family: var(--font-logo);
+    font-size: var(--font-size-logo);
+    margin-left: 1rem;
+    text-align: center;
+    border-bottom: 1px solid transparent;
+    transition: var(--theme-change-transition);
+}
+
+.navLink:hover {
+    border-color: var(--text-color-article-link);
+}
