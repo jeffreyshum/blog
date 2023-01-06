@@ -23,6 +23,12 @@ const Header: FC = () => {
 					<span className={styles.line} id={styles.line2} />
 					<span className={styles.line} id={styles.line3} />
 				</div>
+				<div id={styles.menu}>
+					<Link href="/posts" className={styles.mobileLink}>
+						Posts
+					</Link>
+					<ThemeButton />
+				</div>
 			</div>
 		</header>
 	)

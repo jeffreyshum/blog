@@ -37,11 +37,15 @@
     margin-top: -0.5rem;
     margin-right: 1rem;
     text-align: center;
+}
+
+.navLink, .mobileLink {
     border-bottom: 1px solid transparent;
     transition: var(--theme-change-transition);
 }
 
-.navLink:hover {
+
+.navLink:hover, .mobileLink:hover {
     border-color: var(--text-color-article-link);
 }
 
@@ -108,6 +112,11 @@
     transform: rotate(-45deg);
 }
 
+.toggle:checked ~ #menu {
+    display: block;
+    right: 4.25rem;
+}
+
 @media (max-width: 768px) {
     #right {
         display: none;
@@ -116,4 +125,23 @@
     #mobile {
         display: block;
     }
+}
+
+#menu {
+    position: absolute;
+    right: -50vw;
+    top: 2rem;
+    font-size: var(--font-size-logo);
+    padding-top: 0.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--text-color-primary);
+    background-color: var(--bg-primary);
+    transition: var(--theme-change-transition);
+    text-align: center;
+}
+
+#menu > * {
+    margin-top: 0.5rem;
 }
