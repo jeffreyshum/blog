@@ -34,7 +34,8 @@
 .navLink {
     font-family: var(--font-logo);
     font-size: var(--font-size-logo);
-    margin-left: 1rem;
+    margin-top: -0.5rem;
+    margin-right: 1rem;
     text-align: center;
     border-bottom: 1px solid transparent;
     transition: var(--theme-change-transition);
@@ -42,4 +43,77 @@
 
 .navLink:hover {
     border-color: var(--text-color-article-link);
+}
+
+#mobile {
+    display: none;
+    padding-right: 4rem;
+    position: relative;
+}
+
+.toggle {
+    position: absolute;
+    height: calc(var(--font-size-logo)*1.5);
+    width: calc(var(--font-size-logo)*1.5);
+    cursor: pointer;
+    right: 3.75rem;
+    top: -0.25rem;
+    opacity: 0;
+    z-index: 1000;
+}
+
+/* Hamburger code inspired by codepen.io/alvarotrigo/pen/wvrzPWL */
+#hamburger {
+    display: block;
+    height: var(--font-size-logo);
+    width: var(--font-size-logo);
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    top: 0.25rem;
+    right: 4.5rem;
+}
+
+.line {
+    height: 4px;
+    width: 125%;
+    border-radius: 5px;
+    background: var(--text-color-primary);
+}
+
+#line1 {
+    transform-origin: 0% 0%;
+    transition: transform 0.4s ease-in-out;
+}
+
+#line2 {
+    transition: transform 0.2s ease-in-out;
+}
+
+#line3 {
+    transform-origin: 0% 100%;
+    transition: transform 0.4s ease-in-out;
+}
+
+.toggle:checked ~#hamburger #line1 {
+    transform: rotate(45deg);
+}
+
+.toggle:checked ~ #hamburger #line2 {
+    transform: scaleY(0);
+}
+
+.toggle:checked ~ #hamburger #line3 {
+    transform: rotate(-45deg);
+}
+
+@media (max-width: 768px) {
+    #right {
+        display: none;
+    }
+
+    #mobile {
+        display: block;
+    }
 }
