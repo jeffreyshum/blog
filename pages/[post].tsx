@@ -60,6 +60,8 @@ const PostPage: NextPage<PostPageProps> = ({ code, frontmatter }) => {
 					/>
 				)}
 				<meta name="og:article:tag" content={frontmatter.category} />
+				<meta name="twitter:card" content="summary_large_image" />
+				<meta name="twitter:title" content={frontmatter.title} />
 			</Head>
 			<article id={styles.article}>
 				<div id={styles.frontMatter}>
