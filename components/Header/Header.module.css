@@ -140,6 +140,7 @@
     background-color: var(--bg-primary);
     transition: var(--theme-change-transition);
     text-align: center;
+    font-family: var(--font-logo);
 }
 
 #menu > * {

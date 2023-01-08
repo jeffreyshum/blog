@@ -1,5 +1,5 @@
 @font-face {
-    font-family: Raleway;
+    font-family: "jslogo";
     src: url("/fonts/Raleway-VariableFont-wght.ttf");
 }
 
@@ -10,7 +10,7 @@
     --font-size-article-h1: 2.25rem;
     --font-size-article-time: 1rem;
     --box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-    --font-logo: Raleway;
+    --font-logo: "jslogo";
     --font-size-logo: 1.5rem;
     --font-size-footer: 1rem;
     --theme-change-transition: 0.3s ease;
