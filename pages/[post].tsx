@@ -46,6 +46,7 @@ const PostPage: NextPage<PostPageProps> = ({ code, frontmatter }) => {
 					name="og:image"
 					content={`/images/splash/${frontmatter.splash}`}
 				/>
+				<meta name="og:image:size" content="1200x630" />
 				<meta name="og:type" content="article" />
 				<meta name="og:article:author" content={frontmatter.author} />
 				<meta

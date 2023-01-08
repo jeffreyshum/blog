@@ -22,6 +22,7 @@ const Posts: NextPage<IndexProps> = ({ recentPosts }) => {
 					content="All posts from Jeffrey Shum's Blog"
 				/>
 				<meta name="og:image" content="/images/splash/index.png" />
+				<meta name="og:image:size" content="1200x630" />
 			</Head>
 			<div className={styles.title}>
 				<h1>All Posts</h1>
