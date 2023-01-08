@@ -27,6 +27,7 @@ const Index: NextPage<IndexProps> = ({ recentPosts }) => {
 				<meta name="author" content="Jeffrey Shum" />
 				<meta name="og:title" content="Jeffrey Shum - Blog" />
 				<meta name="og:description" content="Jeffrey Shum's Blog" />
+				<meta name="og:image" content="/images/splash/index.png" />
 			</Head>
 			<div className={styles.title}>
 				<h1>Recent Posts</h1>

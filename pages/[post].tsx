@@ -26,6 +26,7 @@ export interface FrontMatter {
 	keywords: string
 	editDate?: string
 	category: string
+	splash?: string
 }
 
 const PostPage: NextPage<PostPageProps> = ({ code, frontmatter }) => {
@@ -41,6 +42,23 @@ const PostPage: NextPage<PostPageProps> = ({ code, frontmatter }) => {
 				<meta name="og:title" content={frontmatter.title} />
 				<meta name="og:description" content={frontmatter.description} />
 				<meta name="og:type" content="article" />
+				<meta
+					name="og:image"
+					content={`/images/splash/${frontmatter.splash}`}
+				/>
+				<meta name="og:type" content="article" />
+				<meta name="og:article:author" content={frontmatter.author} />
+				<meta
+					name="og:article:published_time"
+					content={frontmatter.originalDate}
+				/>
+				{frontmatter.editDate && (
+					<meta
+						name="og:article:modified_time"
+						content={frontmatter.editDate}
+					/>
+				)}
+				<meta name="og:article:tag" content={frontmatter.category} />
 			</Head>
 			<article id={styles.article}>
 				<div id={styles.frontMatter}>
