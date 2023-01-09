@@ -1,0 +1,229 @@
+---
+title: "Devlog #1 - Standing Out"
+author: "Jeffrey Shum"
+description: "This week, we add an all posts route, create embedable components, and take a dive into meta tags."
+originalDate: "2023-01-010EST"
+keywords: "devlog"
+category: "devlog"
+---
+
+# Creating an All Posts Route
+
+Last week, we built the core system for rendering a post, but we are still missing something important.
+A key feature of any blog is the ability to view all posts.
+Luckily for us, this is rather easy to implement.
+
+First, we have to find all the available posts.
+Posts for this blog are housed in a **posts** directory.
+We can use the **fs** module to read the contents of this directory.
+Then, all we have to do is generate an array of post objects and sort them.
+
+{<CodeTitle name="fetch_posts.ts" language="typescript" />}
+
+```ts
+import fs from "fs"
+import matter from "gray-matter"
+
+export interface Post {
+	title: string
+	description: string
+	originalDate: string
+	keywords: string
+	url: string
+	category: string
+}
+
+const fetchPosts = () => {
+	const recentPosts: Array<Post> = []
+	const posts = fs.readdirSync("posts")
+
+	posts.forEach((post) => {
+		const frontMatter = matter(fs.readFileSync(`posts/${post}`).toString())
+
+		recentPosts.push({
+			title: frontMatter.data.title,
+			description: frontMatter.data.description,
+			originalDate: frontMatter.data.originalDate,
+			keywords: frontMatter.data.keywords,
+			url: `/${post.replace(".mdx", "")}`,
+			category: frontMatter.data.category,
+		})
+	})
+
+	// sort posts by date
+	recentPosts.sort((a, b) => {
+		const dateA = new Date(a.originalDate)
+		const dateB = new Date(b.originalDate)
+
+		if (dateA.getTime() > dateB.getTime()) return -1
+		if (dateA.getTime() < dateB.getTime()) return 1
+		return 0
+	})
+
+	return recentPosts
+}
+
+export default fetchPosts
+```
+
+Notice here that we can leverage JavaScript's [built-in sort method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) for arrays to sort our posts.
+To tell JavaScript to sort our posts by date, we have to convert the date strings into JavaScript Date objects.
+Then, we can compare the dates and tell JavaScript to sort accordingly.
+
+Now that we have a way to fetch all posts, we can create a page to list them.
+For example, we may want to have a list of recently published posts on our home page.
+It might look something like this.
+
+{<CodeTitle name="index.tsx" language="react" />}
+
+```tsx
+import { GetStaticProps, NextPage } from "next"
+
+const Index: NextPage<{ recentPosts: Array<Post> }> = ({ recentPosts }) => {
+	return (
+		<>
+			{recentPosts.map((post, i) => (
+				// Map each post object to some component
+				<PostCard key={i} {...post} />
+			))}
+		</>
+	)
+}
+
+export const getStaticProps: GetStaticProps = async () => {
+	return {
+		props: {
+			recentPosts: fetchPosts().slice(0, 4),
+		},
+	}
+}
+
+export default Index
+```
+
+If we wanted to create a page that lists all posts, we would just have to remove the slice method.
+
+```ts
+export const getStaticProps: GetStaticProps = async () => {
+	return {
+		props: {
+			recentPosts: fetchPosts(),
+		},
+	}
+}
+```
+
+# Creating Embeddable Components
+
+You may have noticed a new component in the code snippets above, the IDE-like code title.
+This is just one of many components that can bring life to an otherwise boring page of text.
+As mentioned last week, blog posts like this one are written in [MDX](https://mdxjs.com/), a JSX-enhanced version of Markdown.
+
+For example, we can write something like the following in our MDX files.
+
+{<CodeTitle name="post.mdx" language="mdx" />}
+
+````md
+{<CodeTitle name="index.js" language="javascript" />}
+
+```js
+function hello() {
+	console.log("Hello World")
+}
+```
+````
+
+And it will render like so.
+
+{<CodeTitle name="index.js" language="javascript" />}
+
+```js
+function hello() {
+	console.log("Hello World")
+}
+```
+
+The key here is that we can use any React component we want in our MDX files, as long as we provide said component.
+[mdx-bundler](https://github.com/kentcdodds/mdx-bundler) provides an easy way to pass in components.
+We simply pass in an object containing all of the components we want to be available in our MDX files.
+
+{<CodeTitle name="post.tsx" language="react" />}
+
+```tsx
+import Components from "/Components"
+
+const Component = useMemo(() => getMDXComponent(code), [code])
+
+return (
+	<>
+		<Component components={Components} />
+	</>
+)
+```
+
+We can also replace the default HTML components using this prop. More on this can be found in the [documentation](https://github.com/kentcdodds/mdx-bundler#component-substitution) for mdx-bundler.
+
+# Let's get \<meta\>
+
+This week, we also added important meta tags from the [Open Graph Protocol](https://ogp.me/) developed by Meta (formerly FaceBook).
+Open Graph (OG) tags are similar to your standard meta tags, but they are specifically designed for social media embeds.
+These tags are essential for any blog, as they allow you to customize the look of your posts when they are shared on platforms like Discord and Twitter.
+
+To add these tags, we simply have to add them to our HTML head element as meta tags.
+For a NextJS application, this is often done through the [next/head](https://nextjs.org/docs/api-reference/next/head) element.
+
+For example, we can add the following tags to our post page to correspond with the post's title and description.
+
+{<CodeTitle name="[post].tsx" language="react" />}
+
+```tsx
+return (
+	<Head>
+		<title>{frontmatter.title}</title>
+		<meta name="description" content={frontmatter.description} />
+		<meta name="keywords" content={frontmatter.keywords} />
+		<meta name="author" content={frontmatter.author} />
+		<meta name="og:title" content={frontmatter.title} />
+		<meta name="og:description" content={frontmatter.description} />
+		<meta name="og:type" content="article" />
+		<meta name="og:type" content="article" />
+		<meta name="og:article:author" content={frontmatter.author} />
+		<meta
+			name="og:article:published_time"
+			content={frontmatter.originalDate}
+		/>
+		{frontmatter.editDate && (
+			<meta
+				name="og:article:modified_time"
+				content={frontmatter.editDate}
+			/>
+		)}
+		<meta name="og:article:tag" content={frontmatter.category} />
+	</Head>
+)
+```
+
+If we want to add an image to this embed, we can add the following tags:
+
+```tsx
+<meta
+	name="og:image"
+	content={`/images/splash/${frontmatter.splash}`}
+>
+<meta name="og:image:size" content="1200x630" />
+```
+
+Note that Twitter and Discord also use the following tag to describe the embed type.
+You can read more about this tag from [Twitter's documentation](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards).
+
+```tsx
+<meta name="twitter:card" content="summary_large_image" />
+```
+
+# Looking Ahead
+
+This week, we also added a mobile-friendly navigation bar, and a dark mode toggle.
+However, I am not fully satisfied with them in their current iteration, and will be revisited in the future.
+Looking ahead, I plan to tackle post searching and pagination, along with taking a dabble at implementing an editor for easily working with our custom components.
+
+Until then.
