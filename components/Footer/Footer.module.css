@@ -17,3 +17,20 @@
 .socialIcon {
     height: 3rem;
 }
+
+#linkContainer {
+    color: var(--text-color-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.link {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.copyright {
+    color: var(--text-color-date);
+}

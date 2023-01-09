@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { FC } from "react"
 import Logo from "../Logo"
 import styles from "./Footer.module.css"
@@ -7,8 +8,21 @@ const Footer: FC = () => {
 		<footer id={styles.footer}>
 			<Logo />
 			<br />
-			Copyright © {new Date().getFullYear()} Jeffrey Shum. All Rights
-			Reserved.
+			<div id={styles.linkContainer}>
+				<Link href="/about" className={styles.link}>
+					About
+				</Link>
+				<Link href="/contact" className={styles.link}>
+					Contact
+				</Link>
+				<Link href="/privacy" className={styles.link}>
+					Privacy
+				</Link>
+			</div>
+			<span className={styles.copyright}>
+				Copyright © {new Date().getFullYear()} Jeffrey Shum. All Rights
+				Reserved.
+			</span>
 			<div id={styles.socialContainer}>
 				<a
 					href="https://github.com/jeffreyshum"
