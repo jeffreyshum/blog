@@ -1,0 +1,25 @@
+#mainContent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.heading {
+    margin-bottom: 2rem;
+}
+
+.description {
+    font-size: var(--font-size-article-description);
+    margin-bottom: 2rem;
+}
+
+.link {
+    font-size: var(--font-size-article-description);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--theme-change-transition);
+}
+
+.link:hover {
+    border-color: var(--text-color-article-link);
+}
