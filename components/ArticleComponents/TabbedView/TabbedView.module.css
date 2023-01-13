@@ -1,0 +1,9 @@
+.selectContainer {
+    display: flex;
+    
+}
+
+.selectItem {
+    margin: auto;
+    cursor: pointer;
+}
