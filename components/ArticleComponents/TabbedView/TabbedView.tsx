@@ -17,15 +17,26 @@ const TabbedView: FC<TabbedViewProps> = (props) => {
 					{childArray
 						.filter((child, index) => index % 2 === 0)
 						.map((Label, index) => (
-							<div
+							<button
 								key={index}
 								onClick={(e) => {
 									setActiveTab(index * 2 + 1)
+									document
+										.querySelectorAll(`#${styles.active}`)
+										.forEach((el) => {
+											el.id = ""
+										})
+									e.currentTarget.id = styles.active
 								}}
 								className={styles.selectItem}
+								id={
+									index === (activeTab - 1) / 2
+										? styles.active
+										: ""
+								}
 							>
 								{Label}
-							</div>
+							</button>
 						))}
 				</div>
 				<div className={styles.tabbedContainer}>

@@ -17,6 +17,8 @@
 }
 
 .selectItem {
+    background: inherit;
+    border: inherit;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -27,7 +29,16 @@
 }
 
 .selectItem:hover {
+    border-color: var(--text-color-primary);
+}
+
+#active {
     border-color: var(--text-color-article-link);
+}
+
+.selectItem > * {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .tabbedContent {
