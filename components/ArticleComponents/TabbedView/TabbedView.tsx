@@ -12,7 +12,7 @@ const TabbedView: FC<TabbedViewProps> = (props) => {
 
 	if (props.labels) {
 		return (
-			<div>
+			<>
 				<div className={styles.selectContainer}>
 					{childArray
 						.filter((child, index) => index % 2 === 0)
@@ -28,13 +28,17 @@ const TabbedView: FC<TabbedViewProps> = (props) => {
 							</div>
 						))}
 				</div>
-				<div>{childArray[activeTab]}</div>
-			</div>
+				<div className={styles.tabbedContainer}>
+					<div className={styles.tabbedContent}>
+						{childArray[activeTab]}
+					</div>
+				</div>
+			</>
 		)
 	}
 
 	return (
-		<div>
+		<>
 			<div className={styles.selectContainer}>
 				{childArray.map((child, index) => (
 					<div
@@ -48,8 +52,12 @@ const TabbedView: FC<TabbedViewProps> = (props) => {
 					</div>
 				))}
 			</div>
-			<div>{childArray[activeTab]}</div>
-		</div>
+			<div className={styles.tabbedContainer}>
+				<div className={styles.tabbedContent}>
+					{childArray[activeTab]}
+				</div>
+			</div>
+		</>
 	)
 }
 

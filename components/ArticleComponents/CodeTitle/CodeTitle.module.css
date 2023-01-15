@@ -1,5 +1,5 @@
 .title {
-    background-color: var(--bg-code-title);
+    background-color: var(--bg-code);
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     width: max(25%, 150px);

@@ -15,7 +15,7 @@
     --bg-primary: #222222;
     --bg-header: var(--bg-primary);
     --bg-footer: #1f1f1f;
-    --bg-code-title: hsl(220, 13%, 18%);
+    --bg-code: hsl(220, 13%, 18%);
     --text-color-primary: #F8F8FF;
     --text-color-date: lightgrey;
     --text-color-article-heading: #FFE4E1;
@@ -29,7 +29,7 @@
     --bg-primary: white;
     --bg-header: var(--bg-primary);
     --bg-footer: #f7f7f7;
-	--bg-code-title: hsl(230, 1%, 98%);
+	--bg-code: hsl(230, 1%, 98%);
     --text-color-primary: black;
     --text-color-date: grey;
     --text-color-article-heading: #0693e3;
