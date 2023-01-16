@@ -1,5 +1,6 @@
 .tabbedContainer {
     background-color: var(--bg-code);
+    box-shadow: var(--box-shadow);
 }
 
 .selectContainer {
@@ -14,6 +15,7 @@
     overflow-y: auto;
     padding-bottom: 5px;
     width: fit-content;
+    z-index: 3;
 }
 
 .selectItem {
