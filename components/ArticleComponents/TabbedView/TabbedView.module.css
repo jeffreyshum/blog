@@ -1,6 +1,7 @@
 .tabbedContainer {
     background-color: var(--bg-code);
     box-shadow: var(--box-shadow);
+    transition: background-color var(--theme-change-transition);
 }
 
 .selectContainer {
@@ -8,7 +9,7 @@
     background-color: var(--bg-code);
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    transition: var(---theme-change-transition);
+    transition: var(--theme-change-transition);
     padding-left: 0.25rem;
     padding-right: 0.25rem;
     padding-top: 5px;
