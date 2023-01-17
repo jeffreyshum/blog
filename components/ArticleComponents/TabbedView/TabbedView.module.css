@@ -4,6 +4,7 @@
 }
 
 .selectContainer {
+    margin-top: 1rem;
     background-color: var(--bg-code);
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
