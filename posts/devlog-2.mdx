@@ -1,0 +1,321 @@
+---
+title: "Devlog #2 - Tabular Dude"
+author: "Jeffrey Shum"
+description: "This week, we implement a tabbed system for displaying content in a single view and tackle our first challenge."
+originalDate: "2023-01-17EST"
+keywords: "devlog"
+category: "devlog"
+splash: "devlog-2.png"
+---
+
+# Keeping Tabs
+
+Tabbed systems are a very common UI pattern for displaying multiple pieces of information in a single view.
+The very browser you're reading this from utilizes a tabbed system to display separate pages.
+A tabbed system allows a user to quickly switch between different pieces of information without the need to navigate between pages.
+For communicating code, a tabbed system is a great way to distinguish between different files and pieces of code.
+[Last week](/devlog-1), we implemented a **CodeTitle** component that allows us to display the name of a file like an IDE.
+This week, we complete the IDE experience by implementing a tabbed system for displaying code (or anything).
+
+To get started, we'll need a component that can take in multiple child components and display them accordingly.
+We'll call this component **TabbedView** and it will take in a **labels** prop that determines whether or not we are providing custom labels as children.
+For the sake of exposition, we'll assume that the labels prop is always true, but you can easily modify the code to support built-in numeric labels as well.
+
+<CodeTitle name="TabbedView.tsx" language="react" />
+```tsx
+import { Children, FC, PropsWithChildren, useState } from "react"
+
+interface TabbedViewProps extends PropsWithChildren {
+    labels?: boolean
+}
+const TabbedView: FC<TabbedViewProps> = (props) => {
+    const childArray = Children.toArray(props.children)
+    // Here we assume that every child is a label
+    // directly followed by its corresponding content
+    const [activeTab, setActiveTab] = useState(1)
+}
+```
+
+Now that we have a component that can take in multiple children, we need to figure out how to display them correctly.
+Notice that every label child in our array of children is in an even index $k$ including $0$.
+This means to find every label, we can simply filter the array of children by even indices.
+
+```ts
+// This will leave us with an array of just labels
+childArray.filter((child, index) => index % 2 === 0)
+```
+
+Knowing where the labels are is great, but we also need to know where the corresponding content for each label is.
+We know that the content for a label is always in the next index, so we can simply add $1$ to our labels' indices.
+However, we need to be careful here, since JavaScript's [Array.filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+will return a new reduced array. This means we have to determine the original index in our new array.
+We can do this by reversing our filter calculation and then incrementing 1, as such. 
+This calculated index will be used in an **onClick** function to set the corresponding active tag.
+
+```tsx
+childArray.filter((child, index) => index % 2 === 0)
+    .map((Label, index) => (
+        <button>
+          key={index}
+          onClick={(e) => {
+            // Reverse our filter calculation and increment 1
+            setActiveTab(index * 2 + 1)
+          }}
+          {Label}
+        </button>
+    )
+```
+
+Let's put it all together. I will also give elements some CSS classes for better comprehension.
+
+<CodeTitle name="TabbedView.tsx" language="react" />
+```tsx
+import { Children, FC, PropsWithChildren, useState } from "react"
+import styles from "./TabbedView.module.css"
+
+interface TabbedViewProps extends PropsWithChildren {
+    labels?: boolean
+}
+const TabbedView: FC<TabbedViewProps> = (props) => {
+    const childArray = Children.toArray(props.children)
+    const [activeTab, setActiveTab] = useState(1)
+
+    return (
+        <>
+          <div className={styles.selectContainer}>
+            {childArray.filter((child, index) => index % 2 === 0)
+                .map((Label, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        // Reverse our filter calculation and increment 1
+                        setActiveTab(index * 2 + 1)
+                      }}
+                      className={styles.label}
+                    >
+                      {Label}
+                    </button>
+                )
+            }
+            </div>
+            {/* Here we render the content for the active tab */}
+            <div className={styles.contentContainer}>
+              {childArray[activeTab]}
+            </div>
+        </>
+    )
+}
+
+export default TabbedView
+```
+
+And that's it! We now have a tabbed system that can display any number of labels and corresponding content (assuming the CSS is in order).
+Here's a demo of the tabbed system in action with the component we just created and how it's written up in MDX, which is how posts like this are written.
+
+<TabbedView labels={true}>
+<CodeTitle name="TabbedView.tsx" language="react" />
+```tsx
+import { Children, FC, PropsWithChildren, useState } from "react"
+import styles from "./TabbedView.module.css"
+
+interface TabbedViewProps extends PropsWithChildren {
+    labels?: boolean
+}
+
+const TabbedView: FC<TabbedViewProps> = (props) => {
+    const childArray = Children.toArray(props.children)
+    const [activeTab, setActiveTab] = useState(1)
+
+    return (
+        <>
+          <div className={styles.selectContainer}>
+            {childArray.filter((child, index) => index % 2 === 0)
+                .map((Label, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        // Reverse our filter calculation and increment 1
+                        setActiveTab(index * 2 + 1)
+                      }}
+                      className={styles.label}
+                    >
+                      {Label}
+                    </button>
+                )
+            }
+            </div>
+            {/* Here we render the content for the active tab */}
+            <div className={styles.contentContainer}>
+              {childArray[activeTab]}
+            </div>
+        </>
+    )
+}
+
+export default TabbedView
+```
+<CodeTitle name="TabbedView.module.css" language="css" />
+```css
+.selectContainer {
+    background-color: var(--bg-code);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    transition: var(---theme-change-transition);
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    padding-top: 5px;
+    display: flex;
+    overflow-y: auto;
+    padding-bottom: 5px;
+    width: fit-content;
+    z-index: 3;
+}
+
+.label {
+    background: inherit;
+    border: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    min-width: 20%;
+    border-bottom: 1px solid transparent;
+    margin-right: 1rem;
+}
+
+.label:hover {
+    border-color: var(--text-color-primary);
+}
+
+.contentContainer {
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 1rem;
+}
+```
+<CodeTitle name="example.mdx" language="mdx" />
+````md
+<TabbedView labels={true}>
+<CodeTitle name="TabbedView.tsx" language="react" />
+```tsx
+import { Children, FC, PropsWithChildren, useState } from "react"
+import styles from "./TabbedView.module.css"
+
+interface TabbedViewProps extends PropsWithChildren {
+    labels?: boolean
+}
+
+...
+```
+<CodeTitle name="TabbedView.module.css." language="css" />
+```css
+.selectContainer {
+    background-color: var(--bg-code);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    transition: var(---theme-change-transition);
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    padding-top: 5px;
+    display: flex;
+    overflow-y: auto;
+    padding-bottom: 5px;
+    width: fit-content;
+    z-index: 3;
+}
+
+...
+```
+</TabbedView>
+````
+</TabbedView>
+
+The following snippet of code is rather useful if you want styling for your currently active tab.
+In your CSS, simply style the element with the **#active** id accordingly.
+```tsx
+    onClick={(e) => {
+        setActiveTab(index * 2 + 1)
+        document
+          .querySelectorAll(`#${styles.activeTab}`)
+          .forEach((el) => {
+            el.id = ""
+          })
+        e.currentTarget.id = styles.activeTab
+    }}
+    id={
+        index === (activeTab - 1) / 2 ? styles.activeTab : ""
+    }
+```
+
+# A Pretty Unexpected Difficulty
+
+While working on the **TabbedView** component, I ran into a rather unexpected issue.
+Surprisingly enough, the issue was not related to the component itself, but rather the way [Prettier](https://prettier.io/) formats my MDX files.
+In an MDX file with opening and closing JSX tags, Prettier would automatically format the code incorrectly.
+This would cause the code to not render properly, as the whitespace-sensitive text would be broken up into multiple lines.
+For example, the following code:
+
+<CodeTitle name="example.mdx" language="mdx" />
+````md
+<TabbedView labels={true}>
+<CodeTitle name="example.ts" language="typescript" />
+```ts
+console.log("Hello World")
+```
+<CodeTitle name="example.py" language="python" />
+```py
+print("Hello World")
+```
+</TabbedView>
+````
+
+would be formatted by Prettier into the following:
+
+<CodeTitle name="example.mdx" language="mdx" />
+````md
+<TabbedView labels={true}>
+<CodeTitle name="example.ts" language="typescript" />
+```ts console.log("Hello World") ```
+<CodeTitle name="example.py" language="python" />
+```py print("Hello World") ```
+</TabbedView>
+````
+
+This would cause the code to render like so:
+
+<TabbedView labels={true}>
+<CodeTitle name="example.ts" language="typescript" />
+```ts console.log("Hello World") ```
+<CodeTitle name="example.py" language="python" />
+```py print("Hello World") ```
+</TabbedView>
+instead of the intended result of:
+
+<TabbedView labels={true}>
+<CodeTitle name="example.ts" language="typescript" />
+```ts
+console.log("Hello World")
+```
+<CodeTitle name="example.py" language="python" />
+```py
+print("Hello World")
+```
+</TabbedView>
+
+After some investigation, I found out that the issue was not entirely Prettier's fault, but rather how my code is syntax highlighted by unified's MDX plugin.
+It seems that the plugin doesn't play well with JSX tags, even though JSX is the selling point of MDX.
+Unfortunately, I did not have much time this week to investigate the issue further, so I decided to simply disable Prettier for MDX files for now.
+
+<CodeTitle name=".prettierrc" language="prettier" />
+```text
+*.mdx
+```
+
+# The Plan 
+
+The plan for next week is to finally tackle those loose ends mentioned in previous posts, like reworking the navigation bar.
+It would also appear that tackling a custom MDX editor may need to be moved up on the priority list.
+Other than that, I would like to revisit old code and clean it up a bit, as well as start work on the next component.
+
+Until then.
