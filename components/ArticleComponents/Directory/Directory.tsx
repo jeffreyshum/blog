@@ -1,15 +1,25 @@
-import { FC, PropsWithChildren } from "react"
+import { FC, PropsWithChildren, useState } from "react"
 import styles from "./Directory.module.css"
+import classNames from "classnames"
 
 interface DirectoryProps extends PropsWithChildren {
 	name: string
 	icon?: string
+	expanded?: boolean
 }
 
 const Directory: FC<DirectoryProps> = (props) => {
+	const [expanded, setExpanded] = useState(props.expanded)
+
 	return (
 		<div className={styles.directory}>
-			<div className={styles.label}>
+			<div
+				className={styles.label}
+				onClick={() => {
+					setExpanded(!expanded)
+					console.log("clicked")
+				}}
+			>
 				<img
 					src={
 						props.icon
@@ -22,7 +32,14 @@ const Directory: FC<DirectoryProps> = (props) => {
 				<p className={styles.name}>{props.name}</p>
 			</div>
 			{props.children && (
-				<div className={styles.children}>{props.children}</div>
+				<div
+					className={classNames(
+						styles.children,
+						expanded ? styles.active : styles.inactive
+					)}
+				>
+					{props.children}
+				</div>
 			)}
 		</div>
 	)
