@@ -7,6 +7,8 @@
     padding-left: 0.5rem;
     padding-bottom: 1rem;
     overflow: auto;
+    box-shadow: var(--box-shadow);
+    border-radius: 5px;
 }
 
 .icon {
@@ -19,7 +21,7 @@
     display: flex;
     align-items: center;
 }
-.title {
+.name {
     overflow-x: hidden;
     text-overflow: ellipsis;
 }
@@ -32,4 +34,6 @@
 .children > * {
     padding-top: 0;
     padding-bottom: 0;
+    box-shadow: none;
+    border-radius: 0;
 }

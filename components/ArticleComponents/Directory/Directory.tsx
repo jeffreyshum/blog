@@ -2,7 +2,7 @@ import { FC, PropsWithChildren } from "react"
 import styles from "./Directory.module.css"
 
 interface DirectoryProps extends PropsWithChildren {
-	title: string
+	name: string
 	icon?: string
 }
 
@@ -19,7 +19,7 @@ const Directory: FC<DirectoryProps> = (props) => {
 					alt="Directory Icon"
 					className={styles.icon}
 				/>
-				<p className={styles.title}>{props.title}</p>
+				<p className={styles.name}>{props.name}</p>
 			</div>
 			{props.children && (
 				<div className={styles.children}>{props.children}</div>
