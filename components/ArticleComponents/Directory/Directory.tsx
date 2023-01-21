@@ -23,7 +23,7 @@ const Directory: FC<DirectoryProps> = (props) => {
 							? props.icon
 							: "/images/icons/languages/directory.svg"
 					}
-					alt="Directory Icon"
+					alt=""
 					className={styles.icon}
 				/>
 				<p className={styles.name}>{props.name}</p>
