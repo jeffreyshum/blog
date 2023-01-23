@@ -14,7 +14,10 @@ const Directory: FC<DirectoryProps> = (props) => {
 	return (
 		<div className={styles.directory}>
 			<div
-				className={styles.label}
+				className={classNames(
+					styles.label,
+					props.children && styles.parent
+				)}
 				onClick={() => setExpanded(!expanded)}
 			>
 				<img
