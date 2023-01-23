@@ -24,6 +24,7 @@
     cursor: pointer;
     user-select: none;
 }
+
 .name {
     overflow-x: hidden;
     text-overflow: ellipsis;
@@ -43,6 +44,10 @@
 
 .inactive {
     display: none;
+}
+
+.active {
+    display: block;
 }
 
 .parent:before {
