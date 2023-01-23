@@ -6,7 +6,7 @@ const CodeTitle: FC<{ name: string; language: string }> = ({
 	language,
 }) => {
 	return (
-		<div className={styles.title}>
+		<div className={styles.title} title={name}>
 			<img
 				src={`/images/icons/languages/${language}.svg`}
 				alt=""
