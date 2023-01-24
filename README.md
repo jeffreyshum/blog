@@ -28,7 +28,7 @@ Within `components` there is a subdirectory `ArticleComponents` containing all c
 
 Blog posts are placed into the `posts` top-level directory, and are written in [MDX](https://mdxjs.com/) with the assumption that the components in the default export of `ArticleComponents` are available to be used.
 
-Frontmatter properties specified by the [`FrontMatter`](https://github.com/jeffreyshum/blog/blob/c46ced0a313508da1c4021d7da2270de66a0fc3e/pages/%5Bpost%5D.tsx#L21-L30) interface can and should be declared within `.mdx` files. These properties are used in both in the HTMl head and within the page contents.
+[Frontmatter](https://mdxjs.com/guides/frontmatter/) properties specified by the [`FrontMatter`](https://github.com/jeffreyshum/blog/blob/c46ced0a313508da1c4021d7da2270de66a0fc3e/pages/%5Bpost%5D.tsx#L21-L30) interface can and should be declared within `.mdx` files. These properties are used in both in the HTMl head and within the page contents.
 
 The `styles` top-level directory contains global stylesheets and stylesheets for each NextJS route.
 
