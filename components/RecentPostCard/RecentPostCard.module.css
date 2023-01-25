@@ -18,3 +18,12 @@
 .card:hover, .button:hover, .title:hover {
     border-color: var(--text-color-article-link);
 }
+
+.linkContainer {
+    display: flex;
+}
+
+.category {
+    margin-left: auto;
+    color: var(--font-color-category);
+}

@@ -9,7 +9,10 @@ const RecentPostCard: FC<Post> = (props) => {
 			<Link href={props.url}>
 				<h1 className={styles.title}>{props.title}</h1>
 				<p className={styles.description}>{props.description}</p>
-				<p className={styles.button}>Read More</p>
+				<div className={styles.linkContainer}>
+					<p className={styles.button}>Read More</p>
+					<p className={styles.category}>{props.category}</p>
+				</div>
 			</Link>
 		</div>
 	)

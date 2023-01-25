@@ -23,6 +23,7 @@
     --scrollbar-color: #1f1f1f;
     --scrollbar-thumb-color: #444;
     --scrollbar-thumb-color-hover: #555;
+    --font-color-category: gold;
 }
 
 [data-theme="light"] {
@@ -37,6 +38,7 @@
     --scrollbar-color: lightgrey;
     --scrollbar-thumb-color: #8f8f8f;
     --scrollbar-thumb-color-hover: #555;
+    --font-color-category: deeppink;
 }
 
 #app {
