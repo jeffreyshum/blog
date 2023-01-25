@@ -67,21 +67,24 @@ const PostPage: NextPage<PostPageProps> = ({ code, frontmatter }) => {
 				<div id={styles.frontMatter}>
 					<h1 id={styles.title}>{frontmatter.title}</h1>
 					<p id={styles.description}>{frontmatter.description}</p>
-					<time
-						dateTime={
-							frontmatter.editDate || frontmatter.originalDate
-						}
-						id={styles.date}
-					>
-						Updated:{" "}
-						{new Date(
-							frontmatter.editDate || frontmatter.originalDate
-						).toLocaleDateString("en-US", {
-							year: "numeric",
-							month: "short",
-							day: "numeric",
-						})}
-					</time>
+					<div id={styles.metaDataContainer}>
+						<p id={styles.category}>{frontmatter.category}</p>
+						<time
+							dateTime={
+								frontmatter.editDate || frontmatter.originalDate
+							}
+							id={styles.date}
+						>
+							Updated:{" "}
+							{new Date(
+								frontmatter.editDate || frontmatter.originalDate
+							).toLocaleDateString("en-US", {
+								year: "numeric",
+								month: "short",
+								day: "numeric",
+							})}
+						</time>
+					</div>
 				</div>
 				<hr />
 				<Component components={ArticleComponents} />

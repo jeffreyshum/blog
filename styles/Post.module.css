@@ -64,5 +64,14 @@
 #date {
     align-self: flex-end;
     color: var(--text-color-date);
-    font-size: var(--font-size-article-time)
+    font-size: var(--font-size-article-time);
+    margin-left: auto;
+}
+
+#metaDataContainer {
+    display: flex;
+}
+
+#category {
+    color: var(--font-color-category);
 }
