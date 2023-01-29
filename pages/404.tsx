@@ -1,7 +1,7 @@
 import { NextPage } from "next"
 import Head from "next/head"
 import Link from "next/link"
-import styles from "../styles/error.module.css"
+import styles from "../styles/generalPage.module.css"
 
 const Error404: NextPage = () => {
 	return (
