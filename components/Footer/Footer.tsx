@@ -12,9 +12,12 @@ const Footer: FC = () => {
 				<Link href="/about" className={styles.link}>
 					About
 				</Link>
-				<Link href="/contact" className={styles.link}>
+				<a
+					href="mailto:jeffreyshum0416@gmail.com"
+					className={styles.link}
+				>
 					Contact
-				</Link>
+				</a>
 				<Link href="/privacy" className={styles.link}>
 					Privacy
 				</Link>
