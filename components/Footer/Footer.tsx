@@ -71,6 +71,13 @@ const Footer: FC = () => {
 			>
 				Icons by Icons8
 			</a>
+			<a
+				href="https://github.com/vscode-icons/vscode-icons"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				File icons by vscode-icons
+			</a>
 		</footer>
 	)
 }
