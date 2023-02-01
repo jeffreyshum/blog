@@ -1,0 +1,162 @@
+---
+title: "Devlog #4 - Planning It Out"
+author: "Jeffrey Shum"
+description: "This week, we lay out the plan for the next month, and take our first steps forward."
+originalDate: "2023-01-31EST"
+keywords: "devlog"
+category: "Devlog"
+---
+
+# The Plan 
+
+If you have been following the devlogs through the weeks, you will know that every week we add more items to the list of things that we need to do.
+Oftentimes, the list of things seems to grow faster than we can cross them off. Cest la vie. 
+You will also know that for January, the primary project has been this very blog.
+This week, we are going to take our first steps out of the nest, and start planning a new project. 
+While this blog is in no way fully complete (if it can ever be), I feel that it is currently in a very good state.
+I am happy with the way it looks, and I am happy with the way it functions. 
+I will continue to add more features, and eventually get around to tackling the list of things that I have been putting off for a while.
+
+But for now, I want to start something ambitious, and something that I have been wanting to do for a long time.
+
+# The Project 
+
+Last week, I returned to a new semester at university. As is the nature of education in the modern age, everything is digitized.
+Lessons are over Zoom, assignments are given and submitted through a website, and of course, the times of notebooks and loose binders are gone.
+Perhaps you have heard of [Notion](https://www.notion.so/), a markdown-flavored note-taking app. Or maybe, you favor [Obsidian](https://obsidian.md/) with its vast plugin options.
+Or perhaps you don't use any of these, and you just use a good old trusty word processor. The point is, there are a lot of note-taking apps out there.
+And I have tried a lot of them. Each one has its pros and cons, but I have never found one that I am truly happy with. Perhaps I am just too picky.
+But I have decided that I am going to make my own. 
+
+Of course, a feature-rich note taking app is a monumental task to undertake. As such, it behooves us to break down what we want to do.
+
+# The Feature List 
+
+To be a note-taking app, our app will obviously need to be able to take notes. But what does taking notes entail?
+We need to be able to take user input, whether it's text, images, or maybe even audio, and store it in a way that we can retrieve later.
+To do this, we will follow in the footsteps of many note-taking apps, and leverage the power of markdown. We also need to provide our users with a rich set of tools to aid in the note-taking process.
+Much like this blog uses React components through MDX to provide a rich set of tools, we will try to do the same.
+
+In addition to taking notes, we should also be able to organize them. We need to be able to create folders, subfolders, and maybe even tags to organize our notes.
+Preferably we would also like to be able to search for notes and filter them by tags.
+
+As a final core feature, we would like to be able to export our notes to a variety of common formats, like PDF and HTML.
+As a complement to this, we should also be able to import notes from markdown files, and maybe even from other note-taking apps.
+All of these features are easier said than implemented. As such, we should start discussing the tech stack.
+
+# The Stack 
+
+Naturally, this stack is not set in stone and most certainly will change as we encounter hurdles. But for now, this is what we are going to strive to use.
+
+Our front end will be a web application built in [React](https://reactjs.org/) through [NextJS](https://nextjs.org/).
+We will take advantage of NextJS's API routes to connect to our backend infrastructure. NextJS also allows us to easily set up our app to be a [Progessive Web App](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps), which allows us to provide offline services.
+Our front end will be styled using [styled-components](https://styled-components.com/) to help us keep our styling modular and organized through CSS-in-JS.
+We will also investigate the use of the [unified](https://unifiedjs.com/) ecosystem to help us parse markdown. 
+
+Our backend will be written in [NodeJS](https://nodejs.org/en/) through NextJS. By the nature of our note files being of unknown length and format, we will need to store them in a way that supports this.
+[MongoDB](https://www.mongodb.com/) or any other NoSQL database like [DynamoDB](https://aws.amazon.com/dynamodb/) will be an effective solution.
+We will also need to store user information like logins and passwords, which note files will be associated with.
+We have many options here. We can use a managed solution like [Auth0](https://auth0.com/) or [Firebase](https://firebase.google.com/), or we can encrypt and store them ourselves using a SQL database like [PostgreSQL](https://www.postgresql.org/).
+
+# Getting Started 
+
+Now that we have a general plan, we can start to get our feet wet. We will start by setting up and configuring our NextJS app, and then we can start to build out the building out our core features next week.
+
+To start, we will bootstrap off of NextJS's [create-next-app](https://nextjs.org/docs/api-reference/create-next-app) CLI.
+
+```bash
+npx create-next-app@latest --typescript
+```
+
+This will create a NextJS app with TypeScript support, along with some boiler plate code. We will remove that code leaving us with the following directory.
+
+<Directory name="app" expanded={true}>
+    <Directory name="pages" />
+    <Directory name="public" />
+    <Directory name="styles" />
+    <Directory name=".eslintrc.json" icon="/images/icons/languages/eslint.svg" />
+    <Directory name=".gitignore" icon="/images/icons/languages/git.svg" />
+    <Directory name="README.md" icon="/images/icons/languages/md.svg" />
+    <Directory name="next.config.js" icon="/images/icons/languages/next.svg" />
+    <Directory name="package-lock.json" icon="/images/icons/languages/npm.svg"/>
+    <Directory name="package.json" icon="/images/icons/languages/npm.svg"/>
+    <Directory name="tsconfig.json" icon="/images/icons/languages/tsconfig.svg" />
+</Directory>
+    
+For my personal preference, I will also add a [prettier](https://prettier.io/) config file.
+
+<CodeTitle name=".prettierrc" language="prettier" />
+```json
+{
+    "tabWidth": 4,
+    "semi": false,
+    "useTabs": true,
+    "singleQuote": false,
+    "jsxSingleQuote": false,
+    "bracketSpacing": true,
+    "bracketSameLine": false,
+    "arrowParens": "always"
+}
+```
+
+Let's start by adding some dependencies. Since we are styling our app with styled-components, we will need to install that.
+
+```bash
+npm install styled-components @types/styled-components
+```
+
+To take advantage of server-side Rendering with NextJS, we will need to generate our styled-components on the server.
+To do this, we will simply add the following compiler option to our config file, following the guidance of the [styled-components documentation](https://styled-components.com/docs/advanced#with-swc).
+
+<CodeTitle name="next.config.js" language="next" />
+```json
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+	reactStrictMode: true,
+	compiler: {
+		styledComponents: true,
+	},
+}
+
+module.exports = nextConfig
+```
+
+We will also need to add a **_document** file to our pages directory, which will allow us to add our styling to the server-side rendering.
+
+<CodeTitle name="_document.tsx" language="react" />
+```tsx
+import Document, { DocumentContext } from "next/document"
+import { ServerStyleSheet } from "styled-components"
+
+export default class MyDocument extends Document {
+	static async getInitialProps(ctx: DocumentContext) {
+		const sheet = new ServerStyleSheet()
+		const originalRenderPage = ctx.renderPage
+
+		try {
+			ctx.renderPage = () =>
+				originalRenderPage({
+					enhanceApp: (App) => (props) =>
+						sheet.collectStyles(<App {...props} />),
+				})
+
+			const initialProps = await Document.getInitialProps(ctx)
+			return {
+				...initialProps,
+				styles: (
+					<>
+						{initialProps.styles}
+						{sheet.getStyleElement()}
+					</>
+				),
+			}
+		} finally {
+			sheet.seal()
+		}
+	}
+}
+```
+
+And that's it! We're ready to start building out the first component. Unfortunately, that will have to wait until next week.
+
+Until then.
