@@ -68,7 +68,9 @@ const PostPage: NextPage<PostPageProps> = ({ code, frontmatter }) => {
 					<h1 id={styles.title}>{frontmatter.title}</h1>
 					<p id={styles.description}>{frontmatter.description}</p>
 					<div id={styles.metaDataContainer}>
-						<p id={styles.category}>{frontmatter.category}</p>
+						<a href={`/posts/${frontmatter.category}`}>
+							<p id={styles.category}>{frontmatter.category}</p>
+						</a>
 						<time
 							dateTime={
 								frontmatter.editDate || frontmatter.originalDate
