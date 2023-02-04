@@ -5,6 +5,7 @@
     --font-size-article-h1: 2.25rem;
     --font-size-article-time: 1rem;
     --box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    --thick-box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.5);
     --font-logo: "Times New Roman";
     --font-size-logo: 1.5rem;
     --font-size-footer: 1rem;
@@ -24,6 +25,7 @@
     --scrollbar-thumb-color: #444;
     --scrollbar-thumb-color-hover: #555;
     --font-color-category: gold;
+    --font-color-card: var(--bg-primary);
 }
 
 [data-theme="light"] {
@@ -39,6 +41,7 @@
     --scrollbar-thumb-color: #8f8f8f;
     --scrollbar-thumb-color-hover: #555;
     --font-color-category: deeppink;
+    --font-color-card: #222222;
 }
 
 #app {

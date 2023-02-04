@@ -1,11 +1,12 @@
 import { GetStaticProps, NextPage } from "next"
 import Head from "next/head"
-import { IndexProps } from "."
-import { fetchPosts } from "../utils"
-import styles from "../styles/index.module.css"
-import RecentPostCard from "../components/RecentPostCard"
+import { fetchCategoriesAndCounts } from "../../utils"
+import styles from "../../styles/index.module.css"
+import CategoryCard from "../../components/CategoryCard/CategoryCard"
 
-const Posts: NextPage<IndexProps> = ({ recentPosts }) => {
+const Posts: NextPage<{
+	categories: Array<[string, number]>
+}> = ({ categories }) => {
 	return (
 		<>
 			<Head>
@@ -29,9 +30,15 @@ const Posts: NextPage<IndexProps> = ({ recentPosts }) => {
 			<div className={styles.title}>
 				<h1>All Posts</h1>
 			</div>
-			{recentPosts.map((post, i) => (
-				<RecentPostCard {...post} key={i} />
-			))}
+			<div className={styles.cardContainer}>
+				{categories.map((category, i) => (
+					<CategoryCard
+						category={category.at(0) as string}
+						count={category.at(1) as number}
+						key={i}
+					/>
+				))}
+			</div>
 		</>
 	)
 }
@@ -41,7 +48,7 @@ export default Posts
 export const getStaticProps: GetStaticProps = async () => {
 	return {
 		props: {
-			recentPosts: fetchPosts(),
+			categories: Array.from(fetchCategoriesAndCounts()),
 		},
 	}
 }
