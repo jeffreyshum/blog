@@ -11,7 +11,12 @@ const RecentPostCard: FC<Post> = (props) => {
 				<p className={styles.description}>{props.description}</p>
 				<div className={styles.linkContainer}>
 					<p className={styles.button}>Read More</p>
-					<p className={styles.category}>{props.category}</p>
+					<Link
+						href={`/posts/${props.category}`}
+						className={styles.category}
+					>
+						{props.category}
+					</Link>
 				</div>
 			</Link>
 		</div>

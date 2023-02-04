@@ -9,13 +9,13 @@
     font-size: 1.5rem;
 }
 
-.title, .button {
+.title, .button, .category {
     border-bottom: 1px solid transparent;
     transition: border-color var(--theme-change-transition);
     width:fit-content
 }
 
-.card:hover, .button:hover, .title:hover {
+.card:hover, .button:hover, .title:hover, .category:hover {
     border-color: var(--text-color-article-link);
 }
 
