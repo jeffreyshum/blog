@@ -1,0 +1,201 @@
+---
+title: "Devlog #5 - The Editor"
+author: "Jeffrey Shum"
+description: "This week, we start work on the text editor for our notes taking app."
+originalDate: "2023-02-07EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+# The Editor
+
+[Last week](/devlog-4), we created a plan for our new note-taking app and set up styled-components in NextJS.
+This week, we'll continue our progress by creating the starting text editor for our app.
+
+Let's create a directory for our component and add a new file called **Editor.tsx**:
+
+<Directory name="app" expanded={true}>
+    <Directory name="components" expanded={true}>
+        <Directory name="Editor" expanded={true}>  
+            <Directory name="Editor.tsx" icon="/images/icons/languages/react.svg" />
+        </Directory>  
+    </Directory>
+</Directory>
+
+Our editor will need two parts, an element for users to input text and a component that renders that text.
+Let's start by defining these two elements as styled-components. Let's also create a container element.
+
+<CodeTitle name="Editor.tsx" language="react" />
+```tsx 
+import styled from "styled-components"
+
+const StyledEditor = styled.div`
+    height: 100vh;
+    display: flex;
+`
+
+const StyledTextArea = styled.textarea`
+    width: 50%;
+    height: 100%;
+    resize: none;
+    outlines: none;
+    padding: 1rem;
+`
+
+const StyledTextRender = styled.div`
+    width: 50%;
+    height: 100%;
+    padding: 1rem;
+`
+```
+
+Now, we can create the actual editor component:
+
+```tsx
+import { FC } from "react"
+
+const Editor: FC = () => {
+    return (
+        <StyledEditor>
+          <StyledTextArea />
+          <StyledTextRender />
+        </StyledEditor>
+    )
+}
+
+export default Editor
+```
+
+What's a text editor without the ability to input text? 
+Let's create a state variable to store the text that our users will input.
+
+```tsx
+import { FC, useState } from "react"
+
+const Editor: FC = () => {
+    const [text, setText] = useState("")
+
+    return (
+        <StyledEditor>
+          <StyledTextArea 
+            value={text}
+            onChange={(e) => setText(e.currentTarget.value)}
+          />
+          <StyledTextRender />
+        </StyledEditor>
+    )
+}
+```
+
+Now, we can render the text that our users input in the textarea element as follows.
+
+```tsx
+return (
+    <StyledEditor>
+      <StyledTextArea 
+        value={text}
+        onChange={(e) => setText(e.currentTarget.value)}
+      />
+      <StyledTextRender>
+        {text}
+      </StyledTextRender>
+    </StyledEditor>
+}
+```
+
+However, this way of rendering text doesn't allow us to use any of the markdown syntax that we want to support.
+We'll need to use a library to parse our inputs and render markdown as HTML.
+Luckily for us, [react-markdown](https://github.com/remarkjs/react-markdown) provides us with everything we need.
+
+Let's install the library and add it to our component.
+
+```bash
+npm install react-markdown
+
+# or 
+
+yarn add react-markdown
+```
+
+<CodeTitle name="Editor.tsx" language="react" />
+```tsx
+import { FC, useState } from "react"
+import ReactMarkdown from "react-markdown"
+
+const Editor: FC = () => {
+    const [text, setText] = useState("")
+
+    return (
+        <StyledEditor>
+          <StyledTextArea 
+            value={text}
+            onChange={(e) => setText(e.currentTarget.value)}
+          />
+          <StyledTextRender>
+            <ReactMarkdown>
+              {text}
+            </ReactMarkdown>
+          </StyledTextRender>
+        </StyledEditor>
+    )
+}
+```
+
+Now, we can take any markdown input and render it as HTML.
+
+We can also provide rehype and remark plugins to customize the way our markdown is parsed and rendered.
+For example, we can add [rehype-prism-plus]() to add syntax highlighting to highlight code blocks, much like the one below.
+
+```bash
+npm install rehype-prism-plus
+
+# or
+
+yarn add rehype-prism-plus
+```
+
+<CodeTitle name="Editor.tsx" language="react" />
+```tsx
+import rehypePrism from "rehype-prism-plus"
+...
+
+return (
+    <StyledEditor>
+      <StyledTextArea 
+        value={text}
+        onChange={(e) => setText(e.currentTarget.value)}
+      />
+      <StyledTextRender>
+        <ReactMarkdown
+          rehypePlugins={[
+            [rehypePrism, { ignoreMissing: true }]
+          ]}
+        >
+          {text}
+        </ReactMarkdown>
+      </StyledTextRender>
+    </StyledEditor>
+)
+```
+
+Other plugins like [rehype-katex](https://www.npmjs.com/package/rehype-katex) and [remark-math](https://www.npmjs.com/package/remark-math) can be added similarly.
+
+Note that many of these plugins may require additional dependencies or custom CSS to work properly.
+For example, rehype-katex requires the following CSS stylesheet to be added to function properly.
+
+```html
+<link 
+    rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css"
+    integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC"
+    crossorigin="anonymous"
+/>
+```
+
+# Conclusion
+
+While this week's devlog was short, we were able to create a basic text editor that supports markdown syntax.
+Behind the scenes, we also added a few more improvements to this blog, such as having cards for each category and pages for specific posts in each category.
+Next week, we'll add some important features to our editor, such as user tooling.
+
+Until then.
