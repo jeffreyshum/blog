@@ -1,0 +1,19 @@
+.citation {
+    list-style: none;
+}
+
+.title {
+    font-style: italic;
+}
+
+.author:after,
+.title:after,
+.volume:after,
+.publisher:after,
+.publisherLocation:after {
+    content: ', ';
+}
+
+.year:after {
+    content: ". ";
+}

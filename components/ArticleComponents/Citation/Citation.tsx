@@ -14,17 +14,23 @@ interface CitationProps {
 
 const Citation: FC<CitationProps> = (props) => {
 	return (
-		<li>
+		<li className={styles.citation}>
 			<span className={styles.author}>
 				{props.firstName} {props.lastName}
 			</span>
 			<span className={styles.title}>{props.title}</span>
-			<span className={styles.volume}>{props.volume}</span>
-			<span className={styles.publisher}>{props.publisher}</span>
-			<span className={styles.publisherLocation}>
-				{props.publisherLocation}
-			</span>
-			<span className={styles.year}>{props.year}</span>
+			{props.volume && (
+				<span className={styles.volume}>{props.volume}</span>
+			)}
+			{props.publisher && (
+				<span className={styles.publisher}>{props.publisher}</span>
+			)}
+			{props.publisherLocation && (
+				<span className={styles.publisherLocation}>
+					{props.publisherLocation}
+				</span>
+			)}
+			{props.year && <span className={styles.year}>{props.year}</span>}
 		</li>
 	)
 }
