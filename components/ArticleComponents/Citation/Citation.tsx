@@ -2,7 +2,7 @@ import { FC } from "react"
 import styles from "./Citation.module.css"
 
 interface CitationProps {
-	type: "AMS"
+	type?: "AMS"
 	firstName?: string
 	lastName?: string
 	title: string
@@ -10,6 +10,8 @@ interface CitationProps {
 	publisher?: string
 	publisherLocation?: string
 	year?: number
+	doi?: string
+	link?: string
 }
 
 const Citation: FC<CitationProps> = (props) => {
@@ -31,6 +33,24 @@ const Citation: FC<CitationProps> = (props) => {
 				</span>
 			)}
 			{props.year && <span className={styles.year}>{props.year}</span>}
+			{props.doi && (
+				<span className={styles.doi}>
+					<a
+						href={`https://doi.org/${props.doi}`}
+						target="_blank"
+						rel="noreferrer"
+					>
+						doi:{props.doi}
+					</a>
+				</span>
+			)}
+			{props.link && (
+				<span className={styles.link}>
+					<a href={props.link} target="_blank" rel="noreferrer">
+						{props.link}
+					</a>
+				</span>
+			)}
 		</li>
 	)
 }
