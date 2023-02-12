@@ -1,12 +1,38 @@
-import { FC } from "react"
+import { FC, useEffect, useRef } from "react"
 import Logo from "../Logo"
 import styles from "./Header.module.css"
 import ThemeButton from "../ThemeButton"
 import Link from "next/link"
 
 const Header: FC = () => {
+	const headerRef = useRef<HTMLDivElement>(null)
+	const toggleRef = useRef<HTMLInputElement>(null)
+
+	useEffect(() => {
+		const handleClickOut = (e: MouseEvent) => {
+			if (
+				headerRef.current &&
+				!headerRef.current.contains(e.target as Node)
+			) {
+				close()
+			}
+		}
+
+		const close = () => {
+			if (toggleRef.current) toggleRef.current.checked = false
+		}
+
+		document.addEventListener("mousedown", handleClickOut)
+		document.addEventListener("scroll", close)
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOut)
+			document.removeEventListener("scroll", close)
+		}
+	}, [])
+
 	return (
-		<header id={styles.header}>
+		<header id={styles.header} ref={headerRef}>
 			<div id={styles.left}>
 				<Logo />
 			</div>
@@ -17,7 +43,11 @@ const Header: FC = () => {
 				</Link>
 			</nav>
 			<div id={styles.mobile}>
-				<input className={styles.toggle} type="checkbox" />
+				<input
+					className={styles.toggle}
+					type="checkbox"
+					ref={toggleRef}
+				/>
 				<div id={styles.hamburger}>
 					<span className={styles.line} id={styles.line1} />
 					<span className={styles.line} id={styles.line2} />
