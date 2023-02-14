@@ -1,40 +1,76 @@
 import Link from "next/link"
 import { FC } from "react"
+import styled from "styled-components"
 import Logo from "../Logo"
-import styles from "./Footer.module.css"
+
+const FooterContainer = styled.footer`
+	background: var(--bg-footer);
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	font-size: var(--font-size-footer);
+	margin-top: 2rem;
+	padding-top: 1rem;
+	padding-bottom: 3rem;
+	text-align: center;
+	transition: var(--theme-change-transition);
+`
+
+const SocialContainer = styled.div`
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+`
+
+const SocialIcon = styled.img`
+	height: 3rem;
+`
+
+const LinkContainer = styled.div`
+	color: var(--text-color-primary);
+	margin-bottom: 0.5rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+`
+
+const CopyRight = styled.span`
+	color: var(--text-color-date);
+`
+
+const StyledNextLink = styled(Link)`
+	margin-left: 0.5rem;
+	margin-right: 0.5rem;
+`
+
+const StyledLink = styled.a`
+	margin-left: 0.5rem;
+	margin-right: 0.5rem;
+`
 
 const Footer: FC = () => {
 	return (
-		<footer id={styles.footer}>
+		<FooterContainer>
 			<Logo />
 			<br />
-			<div id={styles.linkContainer}>
-				<Link href="/about" className={styles.link}>
-					About
-				</Link>
-				<a
-					href="mailto:jeffreyshum0416@gmail.com"
-					className={styles.link}
-				>
+			<LinkContainer>
+				<StyledNextLink href="/about">About</StyledNextLink>
+				<StyledLink href="mailto:jeffreyshum0416@gmail.com">
 					Contact
-				</a>
-				<Link href="/privacy" className={styles.link}>
-					Privacy
-				</Link>
-			</div>
-			<span className={styles.copyright}>
+				</StyledLink>
+				<StyledNextLink href="/privacy">Privacy</StyledNextLink>
+			</LinkContainer>
+			<CopyRight>
 				Copyright © {new Date().getFullYear()} Jeffrey Shum. All Rights
 				Reserved.
-			</span>
-			<div id={styles.socialContainer}>
+			</CopyRight>
+			<SocialContainer>
 				<a
 					href="https://github.com/jeffreyshum"
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					<img
+					<SocialIcon
 						src={"/images/social/github.svg"}
-						className={styles.socialIcon}
 						alt="GitHub"
 						title="GitHub"
 					/>
@@ -44,9 +80,8 @@ const Footer: FC = () => {
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					<img
+					<SocialIcon
 						src={"/images/social/linkedin.svg"}
-						className={styles.socialIcon}
 						alt="LinkedIn"
 						title="LinkedIn"
 					/>
@@ -56,14 +91,13 @@ const Footer: FC = () => {
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					<img
+					<SocialIcon
 						src={"/images/social/instagram.svg"}
-						className={styles.socialIcon}
 						alt="Instagram"
 						title="Instagram"
 					/>
 				</a>
-			</div>
+			</SocialContainer>
 			<a
 				href="https://icons8.com/"
 				target="_blank"
@@ -78,7 +112,7 @@ const Footer: FC = () => {
 			>
 				File icons by vscode-icons
 			</a>
-		</footer>
+		</FooterContainer>
 	)
 }
 
