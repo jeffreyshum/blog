@@ -1,6 +1,19 @@
 import { FC, useEffect, useState } from "react"
 import { useTheme } from "next-themes"
-import styles from "./ThemeButton.module.css"
+import styled from "styled-components"
+
+const Button = styled.button`
+	background-color: inherit;
+	border: none;
+
+	&:hover {
+		cursor: pointer;
+	}
+`
+
+const Image = styled.img`
+	height: 2rem;
+`
 
 const ThemeButton: FC = () => {
 	const [mounted, setMounted] = useState(false)
@@ -13,20 +26,18 @@ const ThemeButton: FC = () => {
 	if (!mounted) return null
 
 	return (
-		<button
+		<Button
 			onClick={() => {
 				setTheme(theme === "dark" ? "light" : "dark")
 			}}
-			className={styles.button}
 		>
-			<img
+			<Image
 				src={`/images/icons/${theme}.png`}
 				alt=""
 				title="Toggle Theme"
-				className={styles.image}
 				loading="eager"
 			/>
-		</button>
+		</Button>
 	)
 }
 
