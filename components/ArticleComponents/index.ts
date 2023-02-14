@@ -1,5 +1,5 @@
 import CodeTitle from "./CodeTitle";
-import TabbedView from "./TabbedView/TabbedView";
+import TabbedView from "./TabbedView";
 import Directory from "./Directory/Directory";
 
 const ArticleComponents = {
