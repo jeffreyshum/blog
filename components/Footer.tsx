@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { FC } from "react"
 import styled from "styled-components"
-import Logo from "../Logo"
+import Logo from "./Logo"
 
 const FooterContainer = styled.footer`
 	background: var(--bg-footer);

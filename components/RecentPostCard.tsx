@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { FC } from "react"
 import styled, { css } from "styled-components"
-import { Post } from "../../pages"
+import { Post } from "../pages"
 import { useRouter } from "next/router"
 
 const Underline = css`
