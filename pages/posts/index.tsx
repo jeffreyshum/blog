@@ -2,7 +2,7 @@ import { GetStaticProps, NextPage } from "next"
 import Head from "next/head"
 import { fetchCategoriesAndCounts } from "../../utils"
 import styles from "../../styles/index.module.css"
-import CategoryCard from "../../components/CategoryCard/CategoryCard"
+import CategoryCard from "../../components/CategoryCard"
 
 const Posts: NextPage<{
 	categories: Array<[string, number]>
