@@ -1,4 +1,4 @@
-import CodeTitle from "./CodeTitle/CodeTitle";
+import CodeTitle from "./CodeTitle";
 import TabbedView from "./TabbedView/TabbedView";
 import Directory from "./Directory/Directory";
 
