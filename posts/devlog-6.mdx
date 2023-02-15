@@ -1,0 +1,196 @@
+---
+title: "Devlog #6 - Cleaning Up"
+author: "Jeffrey Shum"
+description: "This week, the long overdue code cleanup is here, starting with a transition to styled-components."
+originalDate: "2023-02-014EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+While we have been spending some time planning and working through the note-taking app project, this week, 
+I have finally gotten around to cleaning up the codebase for this blog. 
+his is a long overdue task, and will certainly take multiple weeks (not all in a row) to complete.
+Of course, cleaning code is a never-ending task, but it is pertinent to start now before it becomes too much of a mess.
+
+The first step is to transition from using CSS modules to [styled-components](https://styled-components.com/).
+
+# Why styled-components?
+
+I have been using CSS modules for a while now, and I have been quite happy with it.
+They provide a nice way to scope CSS to a component and are a natural transition from normal CSS since they are just normal CSS files.
+However, the main issue with CSS modules is that they quickly become a mess, especially with many components each with its own CSS file.
+
+That's where styled-components come in. styled-components and its cousins (emotion, etc.) are CSS-in-JS libraries.
+They allow you to write, as the name suggests, CSS in JavaScript, and then use it in your components.
+
+The main benefit of this is that in React, your HTML markup, CSS styling, and JavaScript logic can all be in the same file.
+This makes it much easier to see work on a component since you don't have to switch between multiple files.
+Although, this in itself can be a problem, as your component files can become quite large.
+
+Another benefit of many CSS-in-JS libraries is that they allow you to utilize JavaScript logic in your CSS. 
+This is especially useful for things like theming, where you can change the CSS based on the current theme based on a variable.
+This is something that CSS modules can do! However, it is not as easy and often requires finicky workarounds, like conditionally providing a CSS class name.
+
+# Transitioning to styled-components
+
+Luckily for us, the initial transition from CSS modules to styled-components is quite easy. 
+A large portion of it is just copying and pasting the CSS from the CSS modules files to the styled-components files.
+Let's see an example of this. Here is the code for the theme change button in the header:
+
+<TabbedView labels={true}>
+<CodeTitle name="ThemeButton.tsx" language="react" />
+```tsx
+import { FC, useEffect, useState } from "react"
+import { useTheme } from "next-themes"
+import styles from "./ThemeButton.module.css"
+
+const ThemeButton: FC = () => {
+	const [mounted, setMounted] = useState(false)
+	const { theme, setTheme } = useTheme()
+
+	useEffect(() => {
+		setMounted(true)
+	}, [])
+
+	if (!mounted) return null
+
+	return (
+		<button
+			onClick={() => {
+				setTheme(theme === "dark" ? "light" : "dark")
+			}}
+			className={styles.button}
+		>
+			<img
+				src={`/images/icons/${theme}.png`}
+				alt=""
+				title="Toggle Theme"
+				className={styles.image}
+				loading="eager"
+			/>
+		</button>
+	)
+}
+
+export default ThemeButton
+```
+<CodeTitle name="ThemeButton.module.css" language="css" />
+```css
+.button {
+    background-color: inherit;
+    border: none;
+}
+
+.button:hover {
+    cursor: pointer;
+}
+
+.image {
+    height: 2rem;
+}
+```
+
+</TabbedView>
+
+Let's migrate this to styled-components. First, we need to install styled-components:
+
+```bash
+npm install styled-components
+
+# or
+
+yarn add styled-components
+```
+
+Now let's start by creating styled components for the button and the image.
+In styled-components, we do this through the styled object.
+
+<CodeTitle name="ThemeButton.tsx" language="react" />
+```tsx
+import styled from "styled-components"
+
+const Button = styled.button``
+
+const Image = styled.img``
+```
+
+Now we can copy over the styling from CSS and put them between the two backticks.
+
+<CodeTitle name="ThemeButton.tsx" language="react" />
+```tsx
+import styled from "styled-components"
+
+const Button = styled.button`
+    background-color: inherit;
+    border: none;
+
+    &:hover {
+        cursor: pointer;
+    }
+`
+
+const Image = styled.img`
+    height: 2rem;
+`
+```
+
+Now we can use these styled components as if they were React components in our JSX.
+We can also now remove the CSS class names and the CSS module import.
+
+<CodeTitle name="ThemeButton.tsx" language="react" />
+```tsx
+import { FC, useEffect, useState } from "react"
+import { useTheme } from "next-themes"
+import styled from "styled-components"
+
+const Button = styled.button`
+    background-color: inherit;
+    border: none;
+
+    &:hover {
+        cursor: pointer;
+    }
+`
+
+const Image = styled.img`
+    height: 2rem;
+`
+
+const ThemeButton: FC = () => {
+    const [mounted, setMounted] = useState(false)
+    const { theme, setTheme } = useTheme()
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    if (!mounted) return null
+
+    return (
+        <Button
+            onClick={() => {
+                setTheme(theme === "dark" ? "light" : "dark")
+            }}
+        >
+            <Image
+                src={`/images/icons/${theme}.png`}
+                alt=""
+                title="Toggle Theme"
+                loading="eager"
+            />
+        </Button>
+    )
+}
+
+export default ThemeButton
+```
+
+And that's it! We have successfully migrated from CSS modules to styled-components.
+Of course, this is just a simple example, and there are many more things that we can do with styled-components.
+For example, we can use props to change the styling of a component based on a variable. 
+We will see this in action in the future when we refactor and optimize certain components for styled-components.
+
+Behind the scenes, I also started work on an important component for future blog posts, a citation component.
+Perhaps you will see it in action in some new types of posts soon.
+
+Until then.
