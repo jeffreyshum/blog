@@ -60,8 +60,15 @@ const Footer: FC = () => {
 				<StyledNextLink href="/privacy">Privacy</StyledNextLink>
 			</LinkContainer>
 			<CopyRight>
-				Copyright © {new Date().getFullYear()} Jeffrey Shum. All Rights
-				Reserved.
+				Copyright © {new Date().getFullYear()}{" "}
+				<a
+					href="https://jeffreyshum.com/"
+					target="_blank"
+					rel="noreferrer"
+				>
+					Jeffrey Shum.
+				</a>{" "}
+				All Rights Reserved.
 			</CopyRight>
 			<SocialContainer>
 				<a
