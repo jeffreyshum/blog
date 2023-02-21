@@ -13,7 +13,7 @@ const SelectContainer = styled.div`
 	display: flex;
 	overflow-y: auto;
 	padding-bottom: 5px;
-	width: fit-content;
+	flex-wrap: wrap;
 	z-index: 3;
 
 	& #active {
@@ -28,9 +28,8 @@ const SelectButton = styled.button`
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	min-width: 20%;
+	width: max(25%, 10rem);
 	border-bottom: 1px solid transparent;
-	margin-right: 1rem;
 
 	& > * {
 		margin-top: 0;
