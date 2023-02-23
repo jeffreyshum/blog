@@ -19,6 +19,11 @@ const SelectContainer = styled.div`
 	& #active {
 		border-color: var(--text-color-article-link);
 	}
+
+	@media (max-width: 768px) {
+		flex-direction: column;
+		align-items: center;
+	}
 `
 
 const SelectButton = styled.button`
