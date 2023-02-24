@@ -1,21 +1,23 @@
 import fs from "fs"
 import matter from "gray-matter"
 import { Post } from "../pages"
+import glob from "glob"
 
 const fetchPosts = () => {
-    const recentPosts: Array<Post> = []
+	const recentPosts: Array<Post> = []
 
-	const posts = fs.readdirSync("posts")
+	const files = glob.sync("posts" + "/**/*.mdx")
 
-	posts.forEach((post) => {
-		const frontMatter = matter(fs.readFileSync(`posts/${post}`).toString())
+	files.forEach((file) => {
+		const frontMatter = matter(fs.readFileSync(file).toString())
 
 		recentPosts.push({
 			title: frontMatter.data.title,
 			description: frontMatter.data.description,
 			originalDate: frontMatter.data.originalDate,
 			keywords: frontMatter.data.keywords,
-			url: `/${post.replace(".mdx", "")}`,
+			path: file,
+			url: `/${file.split("/").slice(-1).join("").replace(".mdx", "")}`,
 			category: frontMatter.data.category,
 		})
 	})
@@ -30,7 +32,7 @@ const fetchPosts = () => {
 		return 0
 	})
 
-    return recentPosts
+	return recentPosts
 }
 
 export default fetchPosts

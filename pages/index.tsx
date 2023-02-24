@@ -13,6 +13,7 @@ export interface Post {
 	description: string
 	originalDate: string
 	keywords: string
+	path: string
 	url: string
 	category: string
 }

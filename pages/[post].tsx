@@ -10,6 +10,7 @@ import rehypePrism from "rehype-prism-plus"
 import rehypeKatex from "rehype-katex"
 import remarkMath from "remark-math"
 import ArticleComponents from "../components/ArticleComponents"
+import { fetchPosts } from "../utils"
 
 export interface PostPageProps {
 	code: string
@@ -101,10 +102,12 @@ export const getStaticProps: GetStaticProps<
 	PostPageProps,
 	PostPageParams
 > = async ({ params }) => {
-	const { post } = params!
+	const post = params!.post
+	const posts = fetchPosts()
 
-	const fileName = `posts/${post}.mdx`
-	const file = fs.readFileSync(fileName).toString()
+	const file = fs
+		.readFileSync(posts.find((p) => p.url.replace("/", "") === post)!.path)
+		.toString()
 
 	const { code, frontmatter }: { code: string; frontmatter: FrontMatter } =
 		await bundleMDX({
@@ -132,11 +135,11 @@ export const getStaticProps: GetStaticProps<
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-	const posts = fs.readdirSync("posts")
+	const posts = fetchPosts()
 
 	return {
 		paths: posts.map((post) => ({
-			params: { post: post.replace(".mdx", "") },
+			params: { post: post.url.replace("/", "") },
 		})),
 		fallback: false,
 	}
