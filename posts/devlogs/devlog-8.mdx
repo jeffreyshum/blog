@@ -1,0 +1,172 @@
+---
+title: "Devlog #8 - Glob"
+author: "Jeffrey Shum"
+description: "This week, we improve our core system of fetching posts with the help of globs."
+originalDate: "2023-02-28EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+# A Quick Reminder
+
+Back in [Devlog #1](/devlog-1) we built out the core system for fetching and rendering posts like this one.
+We leverage the power of mdx-bundler to parse mdx files into React components, and then use Next.js to generate static pages for each post.
+The code we wrote looks like this.
+
+<CodeTitle name="fetch_posts.ts" language="typescript" />
+```ts
+import fs from "fs"
+// This helps us parse the frontmatter for each post 
+import matter from "gray-matter"
+
+interface Post {
+    title: string;
+    description: string;
+    originalDate: string;
+    keywords: string;
+    url: string;
+    category: string;
+}
+
+const fetchPosts = () => {
+    const recentPost: Array<Post> = []
+    const posts = fs.readdirSync("posts")
+
+	posts.forEach((post) => {
+		const frontMatter = matter(fs.readFileSync(`posts/${post}`).toString())
+
+		recentPosts.push({
+			title: frontMatter.data.title,
+			description: frontMatter.data.description,
+			originalDate: frontMatter.data.originalDate,
+			keywords: frontMatter.data.keywords,
+			url: `/${post.replace(".mdx", "")}`,
+			category: frontMatter.data.category,
+		})
+	})
+
+    return recentPosts
+}
+
+```
+
+While this implementation has certainly shown its worth to us and has powered this blog for quite a long time, it has a few obvious shortcomings.
+First, it's not very flexible. In its current state, it only allows us to fetch posts that are located in a single directory (in this case, `posts`).
+And secondly, it will break if we ever add a file that isn't an mdx file to the `posts` directory, which makes it exponentially a burden as we add more posts.
+
+# Enter Globs 
+
+Globs are a way to match files and directories to a pattern, similar to regex. For example, if we wanted to find all the files in a directory that end with `.png`, we could use the glob `*.png`.
+Here, the single asterisk means we can have anything before the `.png`, which will match all the files that end with `.png`.
+We can also use multiple asterisks to match multiple directories, for example, `**/*.png` will match all the files that end with `.png` in the current directory and all subdirectories.
+This is useful for us, as we can use globs to match all the files in the `posts` directory, and then filter out the ones that don't end with `.mdx`, while simultaneously matching all the files in subdirectories, affording us some organizational freedom.
+
+To use globs in JavaScript, we will need to use a library called [glob](https://www.npmjs.com/package/glob), which is the most popular library for supporting globs.
+We can install it like so:
+    
+```bash
+npm install glob
+
+# or
+
+yarn add glob
+```
+
+Now, we can use the glob library to fetch all the files in the `posts` directory, and then filter out the ones that don't end with `.mdx`.
+Here's what the code looks like.
+
+<CodeTitle name="fetch_posts.ts" language="typescript" />
+```ts
+import fs from "fs"
+import matter from "gray-matter"
+import glob from "glob"
+
+const fetchPosts = () => {
+	const recentPosts: Array<Post> = []
+
+	const files = glob.sync("posts" + "/**/*.mdx")
+
+	files.forEach((file) => {
+		const frontMatter = matter(fs.readFileSync(file).toString())
+
+		recentPosts.push({
+			title: frontMatter.data.title,
+			description: frontMatter.data.description,
+			originalDate: frontMatter.data.originalDate,
+			keywords: frontMatter.data.keywords,
+			url: `/${post.replace(".mdx", "")}`,
+			category: frontMatter.data.category,
+		})
+	})
+
+    return recentPosts
+}
+```
+
+We use the `glob.sync` function to fetch all the files that match our glob pattern and save the result as an array of paths.
+We then iterate over the array and use the same code we used before to parse the frontmatter and add the post to the array.
+However, we will now have to make a small change to the `url` property, as we no longer have the file name, but the full path.
+We can solve this using a little bit of string manipulation to get just the file name.
+
+```ts
+recentPosts.push({
+	title: frontMatter.data.title,
+	description: frontMatter.data.description,
+	originalDate: frontMatter.data.originalDate,
+	keywords: frontMatter.data.keywords,
+    url: `/${file.split("/").slice(-1).join("").replace(".mdx", "")}`,
+	category: frontMatter.data.category,
+})
+```
+
+The inquisitive reader will notice, we aren't quite finished yet.
+While we can now fetch all the posts we want, we now have to change the way posts are rendered.
+We can alleviate some of the pain by adding another property to the `Post` interface, which will be the path to the file.
+
+```ts
+recentPosts.push({
+	title: frontMatter.data.title,
+	description: frontMatter.data.description,
+	originalDate: frontMatter.data.originalDate,
+	keywords: frontMatter.data.keywords,
+    path: file,
+    url: `/${file.split("/").slice(-1).join("").replace(".mdx", "")}`,
+	category: frontMatter.data.category,
+})
+```
+
+Now, we can modify our `getStaticProps` function on our post page to use the path to the file. 
+Similar changes will be needed for all components which depend on the `fetchPosts` function, but I won't go into detail here.
+Here's what the code for fetching a post page looks like.
+
+<CodeTitle name="[post].tsx" language="react" />
+```tsx
+export const getStaticProps: GetStaticProps<
+    PostPageProps,
+    PostPageParams
+> = async ({ params }) => {
+    const post = params!.post
+    const posts = fetchPosts()
+
+    // Filter out the post we want
+    const file = fs
+        .readFileSync(posts.find((p) => p.url.replace("/", "") === post)!.path)
+        .toString()
+
+    // Then pass the file to the mdx compiler
+    ...
+}
+```
+
+And that's it! We now have a much more flexible way of fetching posts, and we can now organize our posts however we want.
+This opens up many new avenues to explore, one of which I have slowly been building behind the scenes. Hopefully, you will get to see it soon.
+
+# A Month in Review
+
+While this month was meant to be focused on our next project, the note-taking application, we spent a lot of time on the blog.
+University has, as university does, taken up a lot of my time, and I haven't been able to work on the notes app as much as I would have liked.
+Job hunting has also taken up a lot of my time, and I've been working on a few self-improvement projects.
+Even though it wasn't the original plan, I'm still glad it worked out this way, as the blog is slowly becoming better and better.
+Looking ahead to March, I hope to pick up the pace and get the notes app working.
+
+Until then.
