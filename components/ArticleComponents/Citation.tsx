@@ -2,14 +2,14 @@ import { FC } from "react"
 import styled from "styled-components"
 
 interface CitationProps {
-	type?: "AMS" | "APA"
+	type: "AMS" | "APA"
 	firstName?: string
 	lastName?: string
 	title: string
-	volume?: number
+	volume?: string
 	publisher?: string
 	publisherLocation?: string
-	year?: number
+	year?: string
 	doi?: string
 	link?: string
 }
@@ -46,7 +46,9 @@ const Citation: FC<CitationProps> = (props) => {
 					<CommaAfter>
 						{props.firstName} {props.lastName}
 					</CommaAfter>
-					<Italics>{props.title}</Italics>
+					<PeriodAfter>
+						<Italics>{props.title}</Italics>
+					</PeriodAfter>
 					{props.volume && <CommaAfter>{props.volume}</CommaAfter>}
 					{props.publisher && (
 						<CommaAfter>{props.publisher}</CommaAfter>
