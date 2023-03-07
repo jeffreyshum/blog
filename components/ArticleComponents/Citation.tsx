@@ -2,7 +2,7 @@ import { FC } from "react"
 import styled from "styled-components"
 
 interface CitationProps {
-	type?: "AMS"
+	type?: "AMS" | "APA"
 	firstName?: string
 	lastName?: string
 	title: string
@@ -67,6 +67,32 @@ const Citation: FC<CitationProps> = (props) => {
 						</PeriodAfter>
 					)}
 					{props.link && (
+						<PeriodAfter>
+							<Link
+								href={props.link}
+								target="_blank"
+								rel="noreferrer"
+							>
+								{props.link}
+							</Link>
+						</PeriodAfter>
+					)}
+				</Container>
+			)
+		case "APA":
+			return (
+				<Container>
+					<PeriodAfter>
+						{props.lastName} {props.firstName?.charAt(0)}{" "}
+					</PeriodAfter>
+					{props.year && <PeriodAfter>({props.year}) </PeriodAfter>}
+					<PeriodAfter>
+						<Italics>{props.title}</Italics>
+					</PeriodAfter>
+					{props.publisher && (
+						<PeriodAfter>{props.publisher}</PeriodAfter>
+					)}
+					{props.doi && (
 						<PeriodAfter>
 							<Link
 								href={props.link}
