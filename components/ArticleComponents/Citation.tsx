@@ -2,14 +2,14 @@ import { FC } from "react"
 import styled from "styled-components"
 
 interface CitationProps {
-	type?: "AMS"
+	type: "AMS" | "APA"
 	firstName?: string
 	lastName?: string
 	title: string
-	volume?: number
+	volume?: string
 	publisher?: string
 	publisherLocation?: string
-	year?: number
+	year?: string
 	doi?: string
 	link?: string
 }
@@ -18,9 +18,9 @@ const Container = styled.li`
 	list-style: none;
 `
 
-const Italics = styled.span`
-	font-style: italic;
-`
+const Italics = styled.em``
+
+const Bold = styled.strong``
 
 const CommaAfter = styled.span`
 	&:after {
@@ -46,7 +46,9 @@ const Citation: FC<CitationProps> = (props) => {
 					<CommaAfter>
 						{props.firstName} {props.lastName}
 					</CommaAfter>
-					<Italics>{props.title}</Italics>
+					<PeriodAfter>
+						<Italics>{props.title}</Italics>
+					</PeriodAfter>
 					{props.volume && <CommaAfter>{props.volume}</CommaAfter>}
 					{props.publisher && (
 						<CommaAfter>{props.publisher}</CommaAfter>
@@ -67,6 +69,32 @@ const Citation: FC<CitationProps> = (props) => {
 						</PeriodAfter>
 					)}
 					{props.link && (
+						<PeriodAfter>
+							<Link
+								href={props.link}
+								target="_blank"
+								rel="noreferrer"
+							>
+								{props.link}
+							</Link>
+						</PeriodAfter>
+					)}
+				</Container>
+			)
+		case "APA":
+			return (
+				<Container>
+					<PeriodAfter>
+						{props.lastName} {props.firstName?.charAt(0)}{" "}
+					</PeriodAfter>
+					{props.year && <PeriodAfter>({props.year}) </PeriodAfter>}
+					<PeriodAfter>
+						<Italics>{props.title}</Italics>
+					</PeriodAfter>
+					{props.publisher && (
+						<PeriodAfter>{props.publisher}</PeriodAfter>
+					)}
+					{props.doi && (
 						<PeriodAfter>
 							<Link
 								href={props.link}
