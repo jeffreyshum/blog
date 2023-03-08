@@ -18,9 +18,9 @@ const Container = styled.li`
 	list-style: none;
 `
 
-const Italics = styled.span`
-	font-style: italic;
-`
+const Italics = styled.em``
+
+const Bold = styled.strong``
 
 const CommaAfter = styled.span`
 	&:after {

@@ -1,0 +1,175 @@
+---
+title: "Devlog #9 - On Citations"
+author: "Jeffrey Shum"
+description: "This week, we sidetrack once more to talk about citations."
+originalDate: "2023-03-07EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+# A Case for Citations 
+
+When you hear the word "citation" what do you think of?
+Perhaps you recall the dreaded high school English class, where you were repeatedly told to "cite your sources" and "don't plagiarize".
+Or maybe you think of that giant list of references at the end of a scientific paper (or more realistically a Wikipedia article).
+If you're like me, you have probably wondered why citations are so important, and why they are sometimes so difficult to get right.
+
+Naturally, the answer to this question is "they prevent plagiarism". Citations are a way to give credit to an original author(s) for their work, and to prevent others from assuming that the work is your own.
+This is especially important in academics, where new ideas are built upon the work of others. 
+However, citations are also important in other fields, such as journalism, where it is important to give credit to your sources to prevent the spread of misinformation.
+
+While these are both good reasons to cite your sources, they are not entirely satisfying to someone who is not a professional writer.
+After all, if you were a high school student writing a paper on the history of the American Revolution, it is unlikely that your paper would be taken seriously even if you did cite your sources.
+As a matter of fact, in our modern age of quick information access, the value of citations is even more questionable.
+Despite all of this, my argument for citations is not that they are important for sourcing your work, but rather that they are important for a reader who is interested in learning more about whatever you are writing.
+
+As a writer, your primary goal is to communicate your ideas to your audience.
+But as a writer, you have a secondary goal: to make your audience care about your ideas. 
+Citations give a reader who cares to have immediate access to the source of your ideas, and thus allows them to learn more about the topic.
+Of course, this is not to say that citations are the only way to do this, but just the fact that you can provide even just one reader with a path to more information is more than enough to justify the effort of citing your sources.
+
+# Now to the Code
+
+Now that we have established the importance of citations, let's talk about how I implemented them.
+Blog posts like this one are written in [MDX](https://mdxjs.com/), a JSX-enhanced form of Markdown.
+The MDX compiler parses JSX tags in Markdown and convert them into their appropriate HTML or React components.
+This means that we need to create a custom React component to render our citations.
+
+But before we start implementing our `Citation` component, let's first talk about what we want it to do.
+Of course, this involves deciding what type of citation we want to support.
+Luckily for us, we can support all types of citation formats. 
+We can do this by abstracting citations into a few key formatting components.
+
+For example, let's take a look at the following citation written in the AMS format, popular in the mathematical sciences:
+
+<br/>
+<Citation
+    type="AMS"
+    firstName="Carl Friedrich"
+    lastName="Gauss"
+    title="Disquisitiones Arithmeticae"
+    year="1965 (1801)"
+    publisher="Yale University Press"
+    publisherLocation="New Haven, CT"
+/>
+
+You will notice that this citation has a mix of regular and italic text, as well as a mix of commas and periods to separate the different parts of the citation.
+This is a common pattern throughout all citation formats, and thus we can abstract this into a few components.
+The use of [styled-components](https://styled-components.com/) or similar CSS-in-JS libraries makes this process much easier.
+My implementation will use styled-components.
+
+Let's start with components for text styling.
+
+<CodeTitle name="Citation.tsx" language="react" />
+```tsx
+import styled from "styled-components"
+
+// These styles are redundant but are included for the sake of exposition
+const Italics = styled.em`
+    font-style: italic;
+`
+
+const Bold = styled.strong`
+    font-weight: bold;
+`
+
+// We don't need to make a component for normal text
+
+```
+
+Now that we have our text-styling components, let's move on to the components for punctuation.
+
+<CodeTitle name="Citation.tsx" language="react" />
+```tsx
+const CommaAfter = styled.span`
+	&:after {
+		content: ", ";
+	}
+`
+
+const PeriodAfter = styled.span`
+	&:after {
+		content: ". ";
+	}
+`
+```
+
+Finally, let's create a component for the actual citation. I will also include a TypeScript interface, and a few extra components that will we will use.
+<CodeTitle name="Citation.tsx" language="react" />
+```tsx
+import { FC } from "react"
+
+interface CitationProps {
+	type?: "AMS"
+	firstName?: string
+	lastName?: string
+	title: string
+	volume?: number
+	publisher?: string
+	publisherLocation?: string
+	year?: number
+	doi?: string
+	link?: string
+}
+
+const Container = styled.li`
+	list-style: none;
+`
+
+const Link = styled.a`
+	color: var(--text-color-article-link);
+`
+
+const Citation: FC<CitationProps> = (props) {
+	switch (props.type) {
+		case "AMS":
+			return (
+				<Container>
+					<CommaAfter>
+						{props.firstName} {props.lastName}
+					</CommaAfter>
+					<Italics>{props.title}</Italics>
+					{props.volume && <CommaAfter>{props.volume}</CommaAfter>}
+					{props.publisher && (
+						<CommaAfter>{props.publisher}</CommaAfter>
+					)}
+					{props.publisherLocation && (
+						<CommaAfter>{props.publisherLocation}</CommaAfter>
+					)}
+					{props.year && <PeriodAfter>{props.year}</PeriodAfter>}
+					{props.doi && (
+						<PeriodAfter>
+							<Link
+								href={`https://doi.org/${props.doi}`}
+								target="_blank"
+								rel="noreferrer"
+							>
+								doi:{props.doi}
+							</Link>
+						</PeriodAfter>
+					)}
+					{props.link && (
+						<PeriodAfter>
+							<Link
+								href={props.link}
+								target="_blank"
+								rel="noreferrer"
+							>
+								{props.link}
+							</Link>
+						</PeriodAfter>
+					)}
+				</Container>
+			)
+		default:
+			return <></>
+    }
+}
+
+export default Citation
+```
+
+And that's it. To add more citation formats, we can just add more cases to the switch statement (and the interface).
+Hopefully, you will see this component in action in the very new future.
+
+Until then.
