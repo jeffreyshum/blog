@@ -1,0 +1,166 @@
+---
+title: "Devlog #10 - A Fresh New Start"
+author: "Jeffrey Shum"
+description: "This week, we return to our note-taking app from an entirely new direction."
+originalDate: "2023-03-14EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+While it has been a long time since we have worked on our note-taking app (I seemed to always get sidetracked),
+progress has finally been made. I have decided to start from scratch as there were a few very challenging hurdles that I
+could foresee in the future. This time, we will be working with Electron and React.
+I have been wanting to learn Electron for a while now, and I think this is the perfect opportunity to do so.
+
+# Electron
+
+[Electron](https://www.electronjs.org/) is a framework that allows you to build desktop applications using web technologies.
+It is based on Chromium (the engine that powers Google Chrome) and Node.js to allow you to build native apps much like you would a web app.
+Many popular apps such as Discord, Spotify, and Visual Studio Code are built on top of Electron.
+While Electron is often criticized for being slow and bloated (since it runs an instance of Chromium), it is still a very powerful tool.
+
+# Getting Started 
+
+While you can start a new Electron project from scratch, I decided to use the wonderful template [Electron Vite React](https://github.com/electron-vite/electron-vite-react),
+which provides a great starting point for Electron apps using Vite (an incredibly fast set of development tools) and React.
+I will be using this template for the rest of this post, although almost all of the information here is not specific to any template.
+
+To get started, we need to clone the template and install the dependencies, npm provides a command to easily copy the template:
+
+```bash
+npm create electron-vite
+
+cd electron-vite-react
+
+npm install
+```
+
+We can now run the app using `npm run dev`, which will start the app in development mode.
+
+If you recall from previous posts, the core of any note-taking app is the ability to modify notes, and the ability to view them.
+To help us with this, we will be using [react-simple-code-editor](https://www.npmjs.com/package/react-simple-code-editor) for the editor,
+and [react-markdown](https://www.npmjs.com/package/react-markdown) for the preview.
+I will also be using [styled-components] for styling, which is a very powerful CSS-in-JS library. 
+
+```bash
+npm install react-simple-code-editor react-markdown styled-components
+```
+
+# The Editor 
+
+Luckily for us, the editor is very simple to implement with the help of react-simple-code-editor.
+We can simply import the editor and pass in the appropriate props to get a fully functional editor.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx
+import { FC, useState } from "react"
+import Editor from "react-simple-code-editor";
+import styled from "styled-components";
+
+const AppContainer = styled.div`
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+`
+
+const StyledEditor = styled(Editor)`
+    width: 100%;
+    min-height: 100%;
+    resize: none;
+    outline: none
+    padding: 1rem;
+`
+
+const App: FC = () => {
+    const [value, setValue] = useState("");
+
+    return (
+        <AppContainer>
+            <StyledEditor
+                value={value}
+                onValueChange={setValue}
+                highlight={code => code}
+            />
+        </AppContainer>
+    )
+}
+
+export default App
+```
+
+If we want to add some syntax highlighting, we can use [prismjs](https://prismjs.com/) to do so.
+We simply pass in a highlight function that takes in the current text and returns the highlighted text.
+
+```tsx
+import { highlight, languages } from "prismjs"
+import "prismjs/components/prism-markdown"
+
+return (
+    <AppContainer>
+        <StyledEditor
+            value={value}
+            onValueChange={setValue}
+            highlight={code => highlight(code, languages.markdown, "markdown")}
+        />
+    </AppContainer>
+)
+```
+
+Now we need the ability to render the user input as markdown.
+For now, I am using the same component described in this [devlog](/devlog-5) along with a few plugins
+like [remark-math](https://www.npmjs.com/package/remark-math), [remark-gfm](https://www.npmjs.com/package/remark-gfm),
+[rehype-katex](https://www.npmjs.com/package/rehype-katex),
+[rehype-prism-plus](https://www.npmjs.com/package/rehype-prism-plus),
+and [rehype-prism](https://www.npmjs.com/package/rehype-prism).
+
+<CodeTitle name="Render.tsx" language="react" />
+```tsx
+import { FC } from "react"
+import styled from "styled-components"
+import ReactMarkdown from "react-markdown"
+import rehypePrism from "rehype-prism-plus"
+import rehypeKatex from "rehype-katex"
+import remarkMath from "remark-math"
+import remarkGfm from "remark-gfm"
+
+const StyledRender = styled.div`
+	width: 100%;
+	min-height: 100%;
+	padding: 1rem;
+`
+
+interface RenderProps {
+	content: string
+}
+
+const Render: FC<RenderProps> = ({ content }) => {
+	return (
+		<StyledRender>
+			<ReactMarkdown
+				rehypePlugins={[
+					[rehypePrism, { ignoreMissing: true }],
+					rehypeKatex,
+				]}
+				remarkPlugins={[remarkMath, remarkGfm]}>
+				{content}
+			</ReactMarkdown>
+		</StyledRender>
+	)
+}
+
+export default Render
+```
+
+Here's what it looks like:
+
+![Demo](/images/posts/devlog-10/demo.png)
+
+# Next Steps
+
+Now that we have a basic editor and preview, we can start working on working with files.
+We need to be able to save (preferably automatically), open, and create new files. 
+We also need a way to organize our files within our app.
+
+Unfortunately, that will have to wait for next week.
+
+Until then.
