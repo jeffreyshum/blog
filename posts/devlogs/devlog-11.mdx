@@ -1,0 +1,207 @@
+---
+title: "Devlog #11 - Menus Done Quick"
+author: "Jeffrey Shum"
+description: "This week, we set up some basic menus."
+originalDate: "2023-03-21EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+This week's devlog is a less technical content than usual, but I believe that it may be one of the most important for our notes-taking app project.
+Last week, we started on a fresh slate with Electron for building native desktop apps, while also getting a rudimentary, but fully working, editor and renderer set up.
+
+Now, let us turn our attention to menus. Not the menu that you might get in a restaurant, but the menu that you might see in a desktop app.
+It is the list of options that you can select to perform an action, typically at the top of an application.
+If you are a Mac user, you will be very familiar with this concept, as Mac apps all have a menu bar at the top of the screen.
+But app menus are not exclusive to Macs and are ubiquitous across all platforms.
+
+For example, open up your favorite text editor and might find a menu with a "File" option, which has a "New" option, a "Save" option, and a "Quit" option.
+Next to that, you might have an "Edit" menu, which has a "Copy" option, a "Paste" option, a "Select All" option, and so on.
+These menus are not just for show, but they are also a way for users to interact with your app.
+While many people now commonly use keyboard shortcuts to perform actions, like Ctrl+C to copy, Ctrl+V to paste, and Ctrl+A to select all, menus are still very important for accessibility and discoverability.
+
+Consider the case of a user who is using a note-taking application for the first time (like our app).
+They might not know how to create a new note, or how to save their work.
+They might even find the app overwhelming at first, and not know where to start.
+In this case, the menu bar provides an important grounding point for the user to start exploring the app.
+If they want to open a file with our app, their first instinct might be to look at the "File" menu, and they will find the "Open" option there.
+Or maybe, they want to change the font size of their note, and they will find an "Edit" menu with a "Font Size" option.
+And if none of these options are what they are looking for, they can always look at the "Help" menu, which will attempt to guide them to the right place.
+
+So clearly menus are important, but how do we implement them in Electron?
+
+# Electron Menus 
+
+Electron provides a very simple API for creating menus and even provides a lot of built-in functionality for us.
+
+To start, we need to create a menu template, which is simply an array of objects that describe the menu items.
+Each item in this array contains a `label` property, which is the text that will be displayed as the menu button, and an array called `submenu` that contains the items that will be displayed when the user clicks on the menu button.
+
+For example, here is a simple menu template for an "Edit" menu that has a "Copy" option, a "Paste" option, and a "Select All" option:
+
+```ts 
+const template = [
+    {
+        label: "Edit",
+        submenu: [
+            { role: "copy" },
+            { role: "paste" },
+            { role: "selectAll" },
+        ],
+    },
+]
+
+```
+
+Notice here that we are using the `role` property. This is a special property that Electron provides for us, which allows us to tap into some of the built-in functions.
+For example, the `copy` role will automatically copy the selected text to the clipboard, and the `paste` role will automatically paste the contents of the clipboard into the app.
+Why reinvent the wheel?
+
+But what if we want to add some custom functionality to a menu item?
+For example, what if we want to add a "Save" option to our "File" menu?
+We can create a custom menu item by using the `label` property and a `click` property to describe behavior.
+
+```ts
+const template = [
+    {
+        label: "File",
+        submenu: [
+            {
+                label: "Save",
+                click: () => {
+                    // Save the file
+                },
+            },
+        ],
+    },
+]
+
+```
+
+Our newly created "Save" menu item should also adhere to the standard keyboard shortcut for saving, which is Ctrl+S (Cmd+S for Mac users). 
+We can add this shortcut by using the `accelerator` property.
+
+```ts
+const template = [
+    {
+        label: "File",
+        submenu: [
+            {
+                label: "Save",
+                accelerator: "CmdOrCtrl+S",
+                click: () => {
+                    // Save the file
+                },
+            },
+        ],
+    },
+]
+
+```
+
+Now, let's create a basic set of menus for our note-taking app.
+These menus will provide us with a clear set of goals for our app and will help us to understand what features we need to implement.
+Since our app uses TypeScript, we will do some type coerhsions to make our code compliable, as suggested by [jkmartindale on StackOverflow](https://stackoverflow.com/a/68232071).
+
+```ts
+import { MenuItemConstructorOptions } from "electron"
+
+const template: MenuItemConstructorOptions[] = [
+	...((process.platform === "darwin"
+		? [
+				{
+					label: app.name,
+					submenu: [
+						{ role: "about" },
+						{ type: "separator" },
+						{ role: "services" },
+						{ type: "separator" },
+						{ role: "hide" },
+						{ role: "hideOthers" },
+						{ role: "unhide" },
+						{ type: "separator" },
+						{ role: "quit" },
+					],
+				},
+		  ]
+		: []) as MenuItemConstructorOptions[]),
+	{
+		label: "File",
+		submenu: [
+			{
+				label: "New Window",
+				accelerator: "CmdOrCtrl+N",
+				click: () => {},
+			},
+			{
+				label: "Open",
+				accelerator: "CmdOrCtrl+O",
+				click: () => {},
+			},
+			{ type: "separator" },
+			{
+				label: "Save",
+				accelerator: "CmdOrCtrl+S",
+				click: () => {},
+			},
+			{
+				label: "Save As",
+				accelerator: "CmdOrCtrl+Shift+S",
+				click: () => {},
+			},
+			{ type: "separator" },
+			{
+				label: "Close",
+				accelerator: "CmdOrCtrl+W",
+				click: () => {},
+			},
+		],
+	},
+	{
+		label: "Edit",
+		submenu: [
+			{ role: "undo" },
+			{ role: "redo" },
+			{ type: "separator" },
+			{ role: "cut" },
+			{ role: "copy" },
+			{ role: "paste" },
+			{ type: "separator" },
+			{
+				label: "Find",
+				accelerator: "CmdOrCtrl+F",
+				click: () => {},
+			},
+			{
+				label: "Replace",
+				click: () => {},
+			},
+		],
+	},
+	{
+		label: "Selection",
+		submenu: [
+			{
+				role: "selectAll",
+			},
+		],
+	},
+]
+```
+
+Notice that we have a conditional menu that is only displayed for Mac users.
+This is because MacOS has a special menu called the "Application" menu that is always displayed as the first menu item, next to the Apple logo.
+
+Now that we have our menu template, we need to bind it to our app.
+We can do this by calling the `Menu.setApplicationMenu` function and passing in our menu template, which we can create using the `Menu.buildFromTemplate` function.
+
+```ts
+import { Menu } from "electron"
+
+Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+```
+
+And that's it! We now have a fully functional menu bar for our app.
+Next week, we will take a stab at implementing the functionalities for some of these menu items.
+
+Until then.
