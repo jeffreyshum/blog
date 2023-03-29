@@ -1,0 +1,265 @@
+---
+title: "Devlog #12 - Saving...Please Don't Turn Off Your Console"
+author: "Jeffrey Shum"
+description: "This week, we implement saving to our notes-taking app."
+originalDate: "2023-03-28EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+[Last week](/devlog-11), we added our core menus to our note-taking app built on Electron.
+These menus describe the actions that can be performed by a user.
+This week, we begin implementing the actions themselves, starting with the most important one: saving.
+
+# A Quick Reminder
+
+Let us take a moment to review the structure of the editor portion of our app.
+In essence, everything depends on one single React `useEffect` hook, which is called whenever the state of the app changes.
+Specifics can be found in [Devlog#10](/devlog-10).
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx {6}
+import { FC, useState } from "react"
+
+...
+
+const App: FC = () => {
+    const [content, setContent] = useState("")
+
+    return (
+        <StyledAppContainer>
+            <Editor value={content} 
+                    onValueChange={(code) => setContent(code)} 
+            />
+            <Render content={content} />
+        </StyledAppContainer>
+    )
+}
+
+export default App
+```
+
+# Prompting The User 
+
+The first thing we need to consider is how we will prompt the user to save their work.
+Luckily for us, Electron has a built-in dialog box that we can use for this purpose.
+
+To create a dialog box, we need to use the `dialog` module from Electron.
+Our save dialogue will prompt the user with their system file explorer, allowing them to choose where to save their work, and what to name it.
+The full path to the file will be returned to us as a string.
+
+<CodeTitle name="App.ts" language="typescript" />
+```ts
+import { dialog, BrowserWindow } from "electron"
+
+const saveAs = async () => {
+    const path = dialog.showSaveDialogSync(BrowserWindow.getFocusedWindow(), {
+		title: "Save",
+		defaultPath: app.getPath("documents"),
+		filters: [
+			{
+				name: "Markdown",
+				extensions: ["md", "markdown"],
+			},
+		],
+	})
+}
+```
+
+Notice that we are providing a few options to the `showSaveDialogSync` function.
+`defaultPath` is rather self-explanatory - it is the default path that the file explorer will open to.
+Here we are using the system's `documents` directory.
+`filters` is a list of file types that the user can choose from.
+In this case, our app only supports Markdown files, so we are only allowing the appropriate file extensions.
+A full list of options can be found [here](https://www.electronjs.org/docs/latest/api/dialog#dialogshowsavedialogsyncbrowserwindow-options).
+
+# Linking It Together
+
+Now that we have the path to the file, we need to write the contents of the editor to our file.
+To do this, we will need to find some way to pass data between the React and Electron components of our app.
+While there are many ways to do this, with the suggested method of using Electron's event-based `ipcRenderer` module, we will be using something more rudimentary but easily accessible for web developers: the `localStorage` API.
+
+The `localStorage` API is a simple key-value store that persists between sessions, which is perfect for our use case.
+Let's use a `useEffect` hook to save the contents of the editor to `localStorage` whenever the user changes the contents of the editor.
+We should also keep track of whether or not the user has saved their work.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx {8-11}
+import { FC, useState, useEffect } from "react"
+
+...
+
+const App: FC = () => {
+    const [content, setContent] = useState("")
+
+    useEffect(() => {
+        localStorage.setItem("content", content)
+        localStorage.setItem("saved", "false")
+    }, [content])
+
+    return (
+        <StyledAppContainer>
+            <Editor value={content} 
+                    onValueChange={(code) => setContent(code)} 
+            />
+            <Render content={content} />
+        </StyledAppContainer>
+    )
+}
+
+export default App
+```
+
+Now, on the Electron side, we can fetch the contents of the editor from `localStorage` and write it to the file.
+To do this, we will need to use the window's `executeJavaScript` function, which allows us to run JavaScript code in the window's context.
+We will also need to use the `fs` module to write to the file.
+
+<CodeTitle name="App.ts" language="typescript" />
+```ts {5-10,23-28}
+import { dialog, BrowserWindow } from "electron"
+import fs from "fs"
+
+const saveAs = async () => {
+    const window = BrowserWindow.getFocusedWindow()
+    if (!window) return
+
+    const content = await window.webContents.executeJavaScript(
+		"localStorage.getItem('content')"
+	)
+
+    const path = dialog.showSaveDialogSync(BrowserWindow.getFocusedWindow(), {
+		title: "Save",
+		defaultPath: app.getPath("documents"),
+		filters: [
+			{
+				name: "Markdown",
+				extensions: ["md", "markdown"],
+			},
+		],
+	})
+
+    if (path) {
+		fs.writeFileSync(path, content)
+		await window.webContents.executeJavaScript(
+			"localStorage.setItem('saved', 'true')"
+		)
+	}
+}
+```
+
+Now, let us link our function to the menu item.
+
+```ts
+{
+    label: "Save As",
+    accelerator: "CmdOrCtrl+Shift+S",
+    click: saveAs,
+}
+```
+
+Now we can save our work! But, we are not done yet. 
+What if we save our work, make some changes to it, and try to save it again?
+In our current implementation, we will be prompted to save our work as a new file, instead of the expected behavior of overwriting the existing file.
+To fix this, we will need to keep track of the path to the file that the user is currently working on.
+
+```ts {6-8}
+if (path) {
+    fs.writeFileSync(path, content)
+    await window.webContents.executeJavaScript(
+        "localStorage.setItem('saved', 'true')"
+    )
+    await window.webContents.executeJavaScript(
+        "localStorage.setItem('path', '" + path + "')"
+    )
+}
+```
+
+Now, we can check if the current file has a path associated with it, and if it does, we can overwrite the file instead of prompting the user to save it as a new file.
+
+```ts
+{
+    label: "Save",
+    accelerator: "CmdOrCtrl+S",
+    click: async () => {
+        const window = BrowserWindow.getFocusedWindow()
+        const path = await window.webContents.executeJavaScript(
+            "localStorage.getItem('path')"
+        )
+
+        if (path) {
+            fs.writeFileSync(
+                path,
+                await window.webContents.executeJavaScript(
+                    "localStorage.getItem('content')"
+                )
+            )
+        } else {
+            saveAs()
+        }
+    },
+}
+```
+
+Now we can save our work as many times as we want, and it will always be saved to the currently open file.
+
+# Persisting A File 
+
+Notice that a side effect of our current implementation is that we will be persisting the path to the file that the user last worked on.
+We can use this to our advantage to automatically open that last file.
+To do this, we will run a `useEffect` at the start of our app to check if there is a path to a file in `localStorage`.
+If there is, we will open that file and set the contents of the editor to the contents of the file.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx {13-19}
+import { FC, useState, useEffect } from "react"
+
+...
+
+const App: FC = () => {
+    const [content, setContent] = useState("")
+
+    useEffect(() => {
+        localStorage.setItem("content", content)
+        localStorage.setItem("saved", "false")
+    }, [content])
+
+    useEffect(() => {
+		const path = window.localStorage.getItem("path")
+
+		if (path) {
+			setContent(fs.readFileSync(path, "utf-8"))
+		}
+	}, [])
+
+    return (
+        <StyledAppContainer>
+            <Editor value={content} 
+                    onValueChange={(code) => setContent(code)} 
+            />
+            <Render content={content} />
+        </StyledAppContainer>
+    )
+}
+
+export default App
+```
+
+Now, we can close our app, and when we open it again, it will automatically open the last file that we were working on.
+
+As an extra quality of life improvement, let's also change the title of the window to the name of the file that we are currently working on.
+
+```tsx {4}
+useEffect(() => {
+    const path = window.localStorage.getItem("path")
+
+    document.title = path?.split("/").pop() || "Untitled"
+
+    if (path) {
+        setContent(fs.readFileSync(path, "utf-8"))
+    }
+}, [])
+```
+
+And that's it! Next week, we will flesh out the look of our app, and maybe continue picking away at the menu items that we have yet to implement.
+
+Until then.
