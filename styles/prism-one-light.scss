@@ -476,6 +476,7 @@ pre {
 	/* Set highlight bg color */
 	border-left: 4px solid rgb(59, 130, 246);
 	/* Set highlight accent border color */
+	transition: var(--theme-change-transition);
 }
 
 .line-number::before {
