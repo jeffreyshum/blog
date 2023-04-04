@@ -9,6 +9,10 @@ const generateFeed = async () => {
 		title: "Jeffrey Shum's Blog",
 		feed_url: `${url}rss.xml`,
 		site_url: url,
+		description:
+			"Jeffrey Shum's blog featuring developer logs and occasional dabbles in mathematics.",
+		copyright: "2023-Present Jeffrey Shum",
+		language: "en",
 	})
 
 	const posts = fetchPosts()
@@ -20,6 +24,7 @@ const generateFeed = async () => {
 			description: post.description,
 			url: url + post.url,
 			date: post.originalDate,
+			categories: [post.category],
 		})
 	})
 
