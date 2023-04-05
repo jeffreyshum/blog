@@ -58,6 +58,13 @@ const Footer: FC = () => {
 					Contact
 				</StyledLink>
 				<StyledNextLink href="/privacy">Privacy</StyledNextLink>
+				<StyledLink
+					href="/rss.xml"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					RSS
+				</StyledLink>
 			</LinkContainer>
 			<CopyRight>
 				Copyright © {new Date().getFullYear()}{" "}
