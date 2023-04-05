@@ -1,0 +1,167 @@
+---
+title: "Devlog #13 - Really Simple RSS"
+author: "Jeffrey Shum"
+description: "This week, we add RSS support to this blog."
+originalDate: "2023-04-04EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+Nowadays, when you want to stay up to date with something on the internet, you subscribe or follow something.
+It could subscribe to your favorite YouTube channel (don't forget to hit the bell icon!), follow your favorite podcast (wherever you get your podcasts),
+or set up notifications for your favorite social media accounts.
+In modern web browsers, you can even subscribe to web pages and receive notifications much like you would from a mobile app.
+
+However, a relic of the past is still (barely) alive and well: RSS.
+
+# RSS
+
+RSS, which stands for Really Simple Syndication, is a standardized way to send updates to a user, much like a notification.
+As the name suggests, it's a really simple format to syndicate, which means to distribute a content.
+It's been around since the early days of the internet and is still used by many websites and services, although the average user probably doesn't know it.
+
+In essence, RSS is an XML file that contains a list of items, each of which represents a piece of content, or a feed.
+A user can subscribe to an RSS feed, which means adding your website's RSS XML file URL to their RSS reader.
+The RSS reader will then periodically check for updates to the RSS feed, and notify the user of any new items.
+These items can be anything, from a new blog post to a new podcast episode to even a new tweet, it will all show up in the user's RSS reader.
+
+# Adding RSS to The Blog 
+
+To get started with RSS, we need to install the `rss` package, which provides us with a clean API to generate RSS feeds.
+
+```bash
+npm install rss
+
+# or
+
+yarn add rss
+```
+
+Now, we can create a new utility function to generate an RSS feed for our blog.
+
+<Directory name="utils" expanded={true}>
+    <Directory name="rss_feed.ts" language="typescript" />
+</Directory>
+
+<CodeTitle name="rss_feed.ts" language="typescript" />
+```typescript
+import RSS from "rss"
+
+const generateFeed = async () => {
+    // Create a new RSS feed with some options
+    const feed = new RSS({
+        title: "Jeffrey Shum's Blog",
+        feed_url: "https://jeffreyshum.com/rss.xml",
+        site_url: "https://jeffreyshum.com",
+        language: "en",
+    })
+}
+
+export default generateFeed
+```
+
+We defined the following function in [Devlog#8](/devlog-8), which fetches all of our blog posts and returns them as an array of `Post` objects.
+
+<CodeTitle name="fetch_posts.ts" language="typescript" />
+```typescript
+import fs from "fs"
+import matter from "gray-matter"
+import { Post } from "../pages"
+import glob from "glob"
+
+const fetchPosts = () => {
+	const recentPosts: Array<Post> = []
+
+	const files = glob.sync("posts" + "/**/*.mdx")
+
+	files.forEach((file) => {
+		const frontMatter = matter(fs.readFileSync(file).toString())
+
+		recentPosts.push({
+			title: frontMatter.data.title,
+			description: frontMatter.data.description,
+			originalDate: frontMatter.data.originalDate,
+			keywords: frontMatter.data.keywords,
+			path: file,
+			url: `/${file.split("/").slice(-1).join("").replace(".mdx", "")}`,
+			category: frontMatter.data.category,
+		})
+	})
+
+	// sort posts by date
+	recentPosts.sort((a, b) => {
+		const dateA = new Date(a.originalDate)
+		const dateB = new Date(b.originalDate)
+
+		if (dateA.getTime() > dateB.getTime()) return -1
+		if (dateA.getTime() < dateB.getTime()) return 1
+		return 0
+	})
+
+	return recentPosts
+}
+
+export default fetchPosts
+```
+
+We can use this function to pass in our blog posts to our RSS feed.
+
+<CodeTitle name="rss_feed.ts" language="typescript" />
+```typescript
+import RSS from "rss"
+import fetchPosts from "./fetch_posts"
+
+const generateFeed = async () => {
+    const feed = new RSS({
+        title: "Jeffrey Shum's Blog",
+        feed_url: "https://jeffreyshum.com/rss.xml",
+        site_url: "https://jeffreyshum.com",
+        language: "en",
+    })
+
+    const posts = fetchPosts()
+
+    posts.forEach((post, i) => {
+        if (i >= 20) return
+        feed.item({
+			title: post.title,
+			description: post.description,
+			url: url + post.url,
+			date: post.originalDate,
+			categories: [post.category],
+		})
+    })
+}
+
+export default generateFeed
+```
+
+Now, we can generate our XML file by calling `feed.xml()`, and using `fs` to write it to a file.
+
+```typescript
+fs.writeFileSync("./public/rss.xml", feed.xml({ indent: true }))
+```
+
+With that, we now have an RSS feed for our blog that generates every time we build our site.
+But, we still need to run this function at some point to generate our RSS feed.
+We can do this by running it when we build our `index.js` page through NextJS's `getStaticProps` function.
+
+<CodeTitle name="index.tsx" language="react" />
+```typescript
+export const getStaticProps: GetStaticProps = async () => {
+	await generateFeed()
+
+	return {
+		props: {
+			recentPosts: fetchPosts().slice(0, 5),
+		},
+	}
+}
+```
+
+And that's it! We now have an RSS feed for our blog.
+If you want to subscribe to my RSS feed, you can do so [here](https://jeffreyshum.com/rss.xml), or through the link in the footer.
+
+Next week, we'll return to our notes app. 
+
+Until then.

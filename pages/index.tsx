@@ -3,6 +3,7 @@ import RecentPostCard from "../components/RecentPostCard"
 import styles from "../styles/index.module.css"
 import Head from "next/head"
 import { fetchPosts } from "../utils"
+import generateFeed from "../utils/rss_feed"
 
 export interface IndexProps {
 	recentPosts: Array<Post>
@@ -46,6 +47,8 @@ const Index: NextPage<IndexProps> = ({ recentPosts }) => {
 export default Index
 
 export const getStaticProps: GetStaticProps = async () => {
+	await generateFeed()
+
 	return {
 		props: {
 			recentPosts: fetchPosts().slice(0, 5),
