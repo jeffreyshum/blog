@@ -1,0 +1,178 @@
+---
+title: "Devlog #14 - Open and Closed"
+author: "Jeffrey Shum"
+description: "This week, we continue with our note-taking app features, and add opening and closing a file using Electron's IPC system."
+originalDate: "2023-04-11EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+If you recall from [Devlog#12](/devlog-12) we added the ability to save an open file for our note-taking app built with Electron and React.
+The way we did this was by using the browser's native `localStorage` as a handoff between the main and renderer processes.
+This worked well, but it was a bit of a hack, requiring us to forcefully execute JavaScript from the main process to the renderer process.
+Despite this, it was a good way to get started, and due to `localStorage` being persistent, provided us with some nice quality-of-life features.
+
+This week, we will turn to the suggested method for communicating between the main and renderer processes, which is to use Electron's IPC system.
+
+# IPC
+
+Electron's Inter-Process Communication is an event-based system that allows us to send and receive messages between the main and renderer processes.
+There are two modules that we will be using for this, `ipcMain` and `ipcRenderer`, each of which are used within the main and renderer processes respectively.
+
+Let's start with implementing a way to open a file.
+Recall that our open file functionality is implemented through Electron's menu system.
+For example, we have the following menu item.
+
+<CodeTitle name="main/index.ts" language="typescript" />
+```ts
+{
+    label: "Open",
+    accelerator: "CmdOrCtrl+O",
+    click: () => {},
+}
+```
+
+Let's start with tapping into Electron's Dialog API to help us in opening a file.
+
+```ts {5-16}
+{
+    label: "Open",
+    accelerator: "CmdOrCtrl+O",
+    click: () => {
+        const window = BrowserWindow.getFocusedWindow()
+
+        const path = dialog.showOpenDialogSync(window, {
+            title: "Save",
+            defaultPath: app.getPath("documents"),
+            filters: [
+                {
+                    name: "Markdown",
+                    extensions: ["md", "markdown"],
+                },
+            ],
+        })
+    },
+}
+```
+
+More information on how to create a dialog can be found [here](https://www.electronjs.org/docs/api/dialog), and in [Devlog#12](/devlog-12).
+For the TypeScript users, you will notice that the `showOpenDialogSync` function returns a `string[] | undefined` type.
+This is because the user can select multiple files at once, or cancel the dialog.
+
+For our app, we will simply open the first file in the array, and do nothing if the user cancels the dialog.
+Now that we have the path to the file we want to open, we should also make sure that our currently open file is saved.
+Let's create a function to check for this and prompt a dialogue if necessary.
+
+```ts
+const saveBeforeAction = async () => {
+	const window = BrowserWindow.getFocusedWindow()
+	const saved = await window.webContents.executeJavaScript(
+		"localStorage.getItem('saved')"
+	)
+	const content = await window.webContents.executeJavaScript(
+		"localStorage.getItem('content')"
+	)
+	const path = await window.webContents.executeJavaScript(
+		"localStorage.getItem('path')"
+	)
+	if (saved == "false" && (content || path)) {
+		const requestSave = dialog.showMessageBoxSync(
+			BrowserWindow.getFocusedWindow(),
+			{
+				type: "question",
+				buttons: ["No", "Yes"],
+				defaultId: 1,
+				message:
+					"Do you want to save the changes you made to the document?",
+			}
+		)
+		if (requestSave == 1) {
+			save()
+		}
+	}
+}
+```
+
+Now we can call this function before we prompt to open a file.
+Then, if we have a path, we will pass that path through IPC, for our React app to fetch and render from.
+
+```ts {5,19-21}
+{
+    label: "Open",
+    accelerator: "CmdOrCtrl+O",
+    click: async () => {
+        await saveBeforeAction()
+        const window = BrowserWindow.getFocusedWindow()
+
+        const path = dialog.showOpenDialogSync(window, {
+            title: "Save",
+            defaultPath: app.getPath("documents"),
+            filters: [
+                {
+                    name: "Markdown",
+                    extensions: ["md", "markdown"],
+                },
+            ],
+        })
+
+        if (path) {
+            window.webContents.send("open-file", path[0])
+        }
+    },
+}
+```
+
+From our React side, we will listen for the `open-file` event, fetch the file provided, and set our state accordingly.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx
+useEffect(() => {
+    ipcRenderer.on("open-file", (e, path) => {
+        window.localStorage.setItem("path", path)
+        setContent(fs.readFileSync(path, "utf-8"))
+    })
+}, [])
+```
+
+Now we can open files!
+
+# Closing Files
+
+Now that we can open files, we should also be able to close them.
+This is a lot easier than opening files, as all we have to do is send an event to the renderer process to clear the state.
+
+<CodeTitle name="main/index.ts" language="typescript" />
+```ts
+{
+    label: "New Window",
+    accelerator: "CmdOrCtrl+N",
+    click: async () => {
+        await saveBeforeAction()
+        const window = BrowserWindow.getFocusedWindow()
+        window.webContents.send("new-window")
+    },
+}
+```
+
+From our React side, we will simply clear all our state when we receive the `new-window` event.
+<CodeTitle name="App.tsx" language="react" />
+```tsx {2-5}
+useEffect(() => {
+    ipcRenderer.on("new-window", () => {
+        window.localStorage.setItem("path", "")
+        setContent("")
+    })
+
+    ipcRenderer.on("open-file", (e, path) => {
+        window.localStorage.setItem("path", path)
+        setContent(fs.readFileSync(path, "utf-8"))
+    })
+
+}, [])
+```
+
+And that's it! We now can open and close files, and prompt the user to save their work if they have any unsaved changes.
+
+Next week, we will take a look at how we can improve our user experience.
+
+Until then.
