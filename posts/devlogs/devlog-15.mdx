@@ -1,0 +1,236 @@
+---
+title: "Devlog #15 - Smooth Experiences"
+author: "Jeffrey Shum"
+description: "This week, we sand down the sharp edges of our note-taking app."
+originalDate: "2023-04-18EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+For the past month, we have slowly worked on a note-taking app built with React and Electron.
+While the app is technically fully usable and functional, the user experience is still quite a bit lacking (and some menu items are still missing).
+This week, we focused on making the app feel more polished and smooth, starting with a smooth user experience.
+This devlog will be an amalgamation of these changes, many of which are small and subtle, but all of which add up to a much better user experience.
+
+Let's get straight into it.
+
+# Closing With Unsaved Changes 
+
+Often, in text editor apps, when you close the app with unsaved changes, you are prompted with a dialog asking if you want to save your changes before exiting.
+This is particularly important, as it is easy to accidentally close the app without saving your changes.
+
+Recall from [Devlog#12](/devlog-12) that we determine whether we have something unsaved through a state stored in `localStorage`, which gets updated whenever the user makes a change to the note.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx {3}
+useEffect(() => {
+    localStorage.setItem("content", content)
+    localStorage.setItem("saved", "false")
+}, [content])
+```
+
+This state is then updated again when the user saves their changes.
+
+<CodeTitle name="main/index.ts" language="typescript" />
+```ts {14-16}
+const save = async () => {
+	const window = BrowserWindow.getFocusedWindow()
+	const path = await window.webContents.executeJavaScript(
+		"localStorage.getItem('path')"
+	)
+
+	if (path) {
+		fs.writeFileSync(
+			path,
+			await window.webContents.executeJavaScript(
+				"localStorage.getItem('content')"
+			)
+		)
+		await window.webContents.executeJavaScript(
+			"localStorage.setItem('saved', 'true')"
+		)
+	} else {
+		saveAs()
+	}
+}
+```
+
+We can take advantage of this state to determine whether we have unsaved changes when the user tries to close the app.
+First, we need to intercept the `close` event on the `BrowserWindow`, which is fired when the user tries to close the editor.
+
+<CodeTitle name="main/index.ts" language="typescript" />
+```ts {14-16}
+async function createWindow() {
+    win = new BrowserWindow({
+		title: "Main window",
+		icon: join(process.env.PUBLIC, "favicon.ico"),
+		webPreferences: {
+			preload,
+			nodeIntegration: true,
+			contextIsolation: false,
+		},
+	})
+
+    ...
+
+    win.on("close", async (e) => {
+        e.preventDefault()
+    })
+}
+```
+
+Now, we need to prompt the user with a dialog asking if they want to save their changes, only if they have unsaved changes.
+Conveniently, we already implemented this in [Devlog#14](/devlog-14), with opening a new file.
+Recall that we have the following method:
+
+```ts
+const saveBeforeAction = async () => {
+	const window = BrowserWindow.getFocusedWindow()
+	const saved = await window.webContents.executeJavaScript(
+		"localStorage.getItem('saved')"
+	)
+	const content = await window.webContents.executeJavaScript(
+		"localStorage.getItem('content')"
+	)
+	const path = await window.webContents.executeJavaScript(
+		"localStorage.getItem('path')"
+	)
+	if (saved == "false" && (content || path)) {
+		const requestSave = dialog.showMessageBoxSync(
+			BrowserWindow.getFocusedWindow(),
+			{
+				type: "question",
+				buttons: ["No", "Yes"],
+				defaultId: 1,
+				message:
+					"Do you want to save the changes you made to the document?",
+			}
+		)
+		if (requestSave == 1) {
+			await save()
+		}
+	}
+}
+```
+
+We can use this method to prompt the user with a dialog asking if they want to save their changes before closing the app.
+Afterward, we simply close the app as normal.
+
+<CodeTitle name="main/index.ts" language="typescript" />
+```ts {3-5}
+win.on("close", async (e) => {
+    e.preventDefault()
+    await saveBeforeAction()
+    win.destroy()
+    app.quit()
+})
+```
+
+Now, when the user tries to close the app with unsaved changes, they will be prompted with a dialog asking if they want to save their changes before closing the app.
+
+# Delayed State Updates
+
+In the previous devlog, we implemented opening existing files using Electron's IPC system. Here is the code for that from the React end.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx
+useEffect(() => {
+    ipcRenderer.on("new-window", () => {
+        window.localStorage.setItem("path", "")
+        setContent("")
+    })
+
+    ipcRenderer.on("open-file", (e, path) => {
+        window.localStorage.setItem("path", path)
+        setContent(fs.readFileSync(path, "utf-8"))
+    })
+
+}, [])
+```
+
+For the astute, you may notice that there is a small problem with this code in conjunction with the following `useEffect`, which also includes code for a title update:
+
+```tsx
+useEffect(() => {
+    const path = window.localStorage.getItem("path")
+    window.localStorage.setItem("content", content)
+    window.localStorage.setItem("saved", "false")
+    document.title = "Cement - " + (path?.split("/").pop() || "Untitled")
+}, [content])
+```
+
+The problem lies in the order of execution of these two `useEffect` hooks when we open a file.
+When we provide a path during the `open-file` event, we send that path to our renderer process, which then sets the `content` state to the contents of the file.
+This means, that when we open a file, the `content` state is updated lastly, which causes the `saved` state to be set to `false`, even though the file has not been modified yet.
+
+We can fix this by keeping track of the previous `content` state, and only updating the `saved` state if the current `content` state differs from the previous.
+Let's also do some error checking to make sure that the file exists before we try to read it, and have some fallback if it doesn't.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx {1,6-9,18, 21-24}
+const [previousContent, setPreviousContent] = useState("")
+
+useEffect(() => {
+    const path = window.localStorage.getItem("path")
+    window.localStorage.setItem("content", content)
+    if (content !== previousContent) {
+        window.localStorage.setItem("saved", "false")
+    }
+    setPreviousContent(content)
+    document.title = "Cement - " + (path?.split("/").pop() || "Untitled")
+}, [content])
+
+useEffect(() => {
+    const path = window.localStorage.getItem("path")
+    if (path) {
+        try {
+            const fileData = fs.readFileSync(path, "utf-8")
+            setPreviousContent(fileData)
+            setContent(fileData)
+            window.localStorage.setItem("saved", "true")
+        } catch (e) {
+            console.error(e)
+            window.localStorage.setItem("path", "")
+        }
+    }
+
+    ipcRenderer.on("new-window", () => {
+        window.localStorage.setItem("path", "")
+        setContent("")
+    })
+
+    ipcRenderer.on("open-file", (e, path) => {
+        window.localStorage.setItem("path", path)
+        setContent(fs.readFileSync(path, "utf-8"))
+        window.localStorage.setItem("saved", "true")
+    })
+}, [])
+```
+
+# Unsaved Changes Indication
+
+Now that our `saved` state is working properly, we can use it to indicate to the user that they have unsaved changes.
+We can do this by adding a `*` to the end of the title if the `saved` state is `false`.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx {5,8-10}
+useEffect(() => {
+    const path = window.localStorage.getItem("path")
+    window.localStorage.setItem("content", content)
+
+    const title = "Cement - " + path?.split("/").pop() || "Untitled"
+    if (content !== previousContent) {
+        window.localStorage.setItem("saved", "false")
+        document.title = title + " *"
+    } else {
+        document.title = title
+    }
+    setPreviousContent(content)
+}, [content])
+```
+
+And that's it for this week.
+
+Next week, we will turn to the other half of the user experience, the looks.
+
+Until then.
