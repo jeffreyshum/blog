@@ -1,0 +1,140 @@
+---
+title: "Devlog #16 - Persistent Themes"
+author: "Jeffrey Shum"
+description: "This week, we continue with user experience improvements by adding persistent theming through Electron Store."
+originalDate: "2023-04-25EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+This week is a continuation of [last week's devlog](/devlog-15), where we continue to improve the user experience of our note-taking app.
+Last week, we worked on improving the fluidity of the app with quality-of-life improvements such as an unsaved changes warning and fixing continuity issues.
+Now, let us turn to the visual aspect of the app and add persistent theming.
+
+# Persisting Data
+
+To aid in persisting our app's theme to the user's preferences, we will be using [Electron Store](https://www.npmjs.com/package/electron-store), a library that allows us to easily store data in the user's system.
+
+To get started, we will first install the library:
+```bash
+npm install electron-store
+
+# or
+
+yarn add electron-store
+```
+
+Next, from our main process, we will create our store's schema, which represents the data we want to be able to store.
+Using that schema, we will create a new instance of the store.
+
+<CodeTitle name="main/index.ts" language="typescript" />
+```ts 
+import Store, { Schema } from "electron-store"
+
+type themes = "light" | "dark"
+
+interface PersistentData {
+    theme: themes
+}
+
+const Schema: Schema<PersistentData> = {
+    theme: {
+        type: "string"
+        default: "dark"
+    },
+}
+
+const store = new Store({ schema })
+```
+
+Now, when we start our app for the first time, Electron Store will create a new file in the user's system to store our data.
+If that file already exists, it will load the data from that file.
+Now, we need some way to update the data in the store.
+
+In [Devlog #11](/devlog-11), we created the menus for our app. Let's add a menu item to toggle the theme of our app.
+
+<CodeTitle name="main/index.ts" language="typescript" />
+```ts
+{ type: "separator" },
+{
+    label: "Toggle Dark Theme",
+    click: () => {
+        store.set(
+            "theme",
+            store.get("theme") == "dark" ? "light" : "dark"
+        )
+    },
+},
+```
+
+Now, when we click on the menu item, it will toggle the theme in the store.
+However, we still need to update the theme of our app depending on the value in the store.
+
+# Passing To The Renderer
+
+To pass the theme to the renderer, let us use Electron's IPC system.
+First, we will tap into Electron Store's `onDidChange` event to listen for changes to the theme and then send the new theme to the renderer.
+
+<CodeTitle name="main/index.ts" language="typescript" />
+```ts {1}
+const store = new Store({ schema, watch: true})
+
+store.onDidChange("theme", (newTheme, _) => {
+	BrowserWindow.getFocusedWindow()?.webContents.send("theme-change", newTheme)
+})
+```
+
+Next, we will listen for the `theme-change` event in the renderer and update the state accordingly.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx
+const App: FC = () => {
+    const [theme, setTheme] = useState(new Store().get("theme", "dark") as string)
+
+    useEffect(() => {
+        ipcRenderer.on("theme-change", (_, newTheme) => {
+            setTheme(newTheme)
+        })
+    }, [])
+}
+```
+
+Now, we can use the `theme` state to update the theme of our app. 
+This can be done in a variety of ways, but the easiest way is to use the power of styled-components.
+
+# styled-components
+
+[styled-components](https://styled-components.com/) is a CSS-in-JS library that allows us to write CSS in our JavaScript code.
+It also allows us to use props to dynamically change the styles of our components.
+
+Let's start by passing the `theme` state to our `App` component.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx 
+import styled from "styled-components"
+
+const StyledAppContainer = styled.div`
+`
+const App: FC = () => {
+    return <StyledAppContainer theme={theme}>...</StyledAppContainer>
+}
+```
+
+Now, we can check the value of the `theme` prop and change global CSS variables accordingly.
+Here's an example of how we can change the background color and the text color of our app depending on the theme.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx 
+const StyledAppContainer = styled.div`
+    --bg-primary: ${(props) => props.theme === "dark" ? "#222222" : "#ffffff"};
+    --text-color-primary: ${(props) => props.theme === "dark" ? "#f8f8ff" : "#000000"};
+`
+```
+
+And that's it! We now have a fully working theme toggler.
+While this appears to be a small change, it opens up a lot of possibilities for us to style our app.
+Electron store also allows us the possibility of allowing a user to customize the specific colors of the app, which we may explore in the future.
+
+For now, we will continue with just the light and dark themes and focus on some finishing touches for the app.
+
+Until then.
