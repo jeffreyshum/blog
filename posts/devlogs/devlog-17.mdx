@@ -1,0 +1,83 @@
+---
+title: "Devlog #17 - Something New"
+author: "Jeffrey Shum"
+description: "This week, we plan out the next project and start with a general outline."
+originalDate: "2023-05-02EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+For the past two months, I have been working on and off on a markdown-flavored note-taking app powered by React and Electron.
+The progress for that project has been unfortunately slow but has been rather extensively documented in previous devlogs.
+While the app is fully working and ready to be used in its current state, there are still a few features and finishing touches that I would like to add at some point.
+However this week, with the start of a new month, I have decided to start a new project, and this time, I hope to have it completed quicker than the previous one.
+
+For our new project, we will turn to [React Native](https://reactnative.dev/), which provides a framework for building native mobile apps using React.
+While front-end technologies have come a long way in the past few years, with the advent of progressive web apps and API additions to browsers, there are still many advantages to a native app.
+While both native apps and web apps can be installed on a device, native apps are much more discoverable as they can be found on your favorite (or only) app store.
+On the other hand, progressive web apps must be installed from the browser, directly from the website you want.
+This means you must know about the website beforehand, that the website has a PWA, and that you care enough to install it anyways (you're already on the website, why would you need to install it?).
+
+Native apps have other advantages as well, such as being able to access more of the device's hardware and software.
+For example, readers with the latest iPhone may have noticed apps taking advantage of the dynamic island portion of the screen.
+Native apps also provide increased security, but that is not our primary concern for this project (but it should always be!).
+
+# The App 
+
+The app we will be building is perhaps a continuation of the previous project but with a different focus.
+Our app will certainly be able to take notes, but it will also be able to do much more.
+The goal of this app is to be an encompassing suite of productivity tools, including note-taking and task management.
+
+Let's spend the rest of this devlog outlining the features we want to include in this app.
+
+# Calendar Integrations
+
+What's the point of a productivity app if it doesn't help you manage your time?
+
+Of course, as [Tom Scott bluntly puts it](https://www.youtube.com/watch?v=-5wpm-gesOY&ab_channel=Computerphile), we should most certainly avoid rebuilding the wheel here.
+There are already many great calendar apps out there, and we should not try to compete with them.
+Instead, we should try to integrate our app with them.
+
+The most obvious integration would be with Google Calendar, which is arguably the most popular calendar app.
+But of course, we should also try to integrate with other popular calendar apps, such as Outlook and Yahoo.
+Our app should be able to read and write (with permission) to the user's calendar and be able to display events from the calendar.
+
+# Task Management 
+
+In a similar vein, our app should be able to maintain a list of tasks for the user.
+This list should try to integrate with the user's calendar (and vice versa), for a completely streamlined experience.
+
+For example, if the user has a task due on a certain day, the app should be able to create an event on the user's calendar for that day. 
+
+# Note-Taking 
+
+This one is rather self-explanatory. Our app should provide the user with a way to take notes, and organize them in a way that makes sense to them.
+This does not need to be as extensive as our previous project, but it should be able to handle the basic features that a user might expect from a note-taking app.
+
+# User Sync
+
+All of the above features are great, but they are only useful if the user can access them from anywhere and everywhere.
+This means that our app should be able to sync all the user's data across all their devices.
+From a technical perspective, there will need to be great care put into the backend with how we store this data.
+We will also need to consider how we attribute data to a user, and how we authenticate them.
+We can perhaps integrate with popular authentication providers, such as Google.
+
+# Why Not Just Use Google?
+
+While we are on the topic of Google, you may be wondering why we don't just use Google's existing suite of productivity tools.
+The list is rather extensive, and includes Google Calendar, Google Keep, Google Tasks, and Google Drive, all of which sync with your Gmail account!
+While Google does provide an amazing suite of tools, and this project is certainly inspired by them (and others), there are a few reasons why I want to build my own.
+
+Firstly, the primary goal of this project will be user customization. Google is notorious for changing its UI and not providing users with a way to revert to the old UI.
+While this is not necessarily a bad thing, it can be frustrating for users who have grown accustomed to the old UI.
+This project will allow users to fully customize the UI to their liking through the positioning of widgets (hopefully).
+
+Secondly, I want to build this project to learn more about React Native and mobile development in general.
+Phones are not going anywhere anytime soon, and I think it is important to be able to build apps for them, especially if tools like React Native exists to make it easier.
+
+And finally, I want to build this project to spend more time on the backend portion of an app.
+Most of the features named above will require a backend, and I want to learn to build a backend that can adapt to these needs effectively.
+
+Next week, we will start building the app, starting with just that, the backend.
+
+Until then.
