@@ -1,0 +1,127 @@
+---
+title: "Devlog #18 - A Quick Flask API"
+author: "Jeffrey Shum"
+description: "This week, we briefly start the foundations of our Flask API."
+originalDate: "2023-05-09EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+Unfortunately, these few weeks have been quite busy for me, so I haven't been able to put as much time as I would like into projects.
+As a result, the last couple of Devlogs have been rather short, and this one will continue that trend.
+However, the show must go on, so with the little time I had, I decided to start the foundations of our Flask API.
+
+Last week, we sketched out what we want from our new project, a React Native productivity app.
+This week, we start with the backend, powered with a little bit of Python.
+
+# Flask
+
+Flask is a classic Python microframework for building web applications, including REST APIs.
+It's a great tool for building quick prototypes and is versatile enough to be used in production.
+
+I will be using Flask to build out the initial API for our app, however, whether or not Flask will make it to the very end is still up in the air.
+While I am very comfortable with Python, some of the criticism of Python, particularly with regards to its performance and lax typing, are valid concerns.
+However, it is a great language for prototyping, and I am very familiar with it, so I will be using it for now.
+
+# Getting Started
+
+To start, I will be using [Python 3.11](https://www.python.org/downloads/release/python-3110/), which is the latest version of Python at the time of writing.
+Python 3.10+ provides us with a couple of new features, including structural pattern matching and improved type hinting.
+I will also be using [PyCharm](https://www.jetbrains.com/pycharm/), a tools-included IDE for Python development by JetBrains, which provides us with a quick template to jumpstart Flask.
+
+If you are not using PyCharm, you should create a Python Virtual Environment, and install Flask with `pip install flask`.
+
+We will start with a new module called `tasks.py`, which will blueprint our first API endpoint.
+Here we will use Flask's blueprint system to help modularize our code.
+
+<CodeTitle name="tasks.py" language="python" />
+```python
+from flask import Blueprint
+
+task_routes = Blueprint("tasks", __name__)
+```
+
+Now, let's model the type of data we want to return from this endpoint and just return some simple test data.
+We will leave the actual database implementation for later.
+Here's what the JSON response will look like:
+
+```typescript
+{
+    uuid: string,
+    tasks: {
+        title: string,
+        description: string,
+        finished: boolean,
+        creation: int,
+        deadline?: int,
+        category?: string
+    }[]
+}
+```
+
+Essentially, we have a UUID, which will be used to identify the user, and a list of task objects, which have a title, description, finished status, and a creation stamp.
+These task objects also optionally have a deadline and a category.
+
+Here's some sample data:
+
+<CodeTitle name="tasks.py" language="python" />
+```python {5-19}
+from flask import Blueprint
+
+task_routes = Blueprint("tasks", __name__)
+
+tasks = [
+    {
+        "title": "Finish Blog Post",
+        "finished": False,
+        "description": "Complete writing and editing Devlog #18",
+        "creation": 1683603488,
+        "deadline": 1683777599
+    },
+    {
+        "title": "link Database",
+        "finished": False,
+        "description": "Link a database to the backend",
+        "creation": 1683603488,
+    }
+]
+```
+
+Now, let's create our first endpoint, which will return this data.
+
+<CodeTitle name="tasks.py" language="python" />
+```python
+from flask import request, abort, jsonify
+
+@task_routes.route("/task-list")
+def get_task_list():
+    uuid = request.args.get("uuid")
+
+    if not uuid:
+        abort(400)
+    
+    return jsonify(uuid=uuid, tasks=tasks)
+```
+
+Before we run our API, we will need to connect this to the `app.py` entry point, and our app instance.
+
+<CodeTitle name="app.py" language="python" />
+```python {5}
+from flask import Flask
+from tasks import task_routes
+
+app = Flask(__name__)
+app.register_blueprint(task_routes)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+Now, when we run our app, and we call our endpoint `/task-list`, with a `uuid` query parameter, we should get our sample data back.
+If we don't provide a `uuid` query parameter, we will get a 400 error instead.
+
+And that's it! We have a quick Flask API up and running.
+
+Next week will be another short one, as I finish up finals, but I will try to get a little bit more done.
+
+Until then.
