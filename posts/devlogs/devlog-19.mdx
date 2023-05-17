@@ -1,0 +1,101 @@
+---
+title: "Devlog #19 - Flask Error Handling"
+author: "Jeffrey Shum"
+description: "This week, we quickly go over how to create error handlers in Flask."
+originalDate: "2023-5-017EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+As mentioned in previous posts, I have been a bit busy for the past few weeks with the end-of-semester crunch, leading to some shorter devlogs.
+I hope that this will be the last of these shorter devlogs for a while.
+
+Recall that in the last devlog, we started a basic Flask backend for our large-scale project.
+This week, we will be focusing on error handling in Flask.
+
+# Error Handling
+
+The following code snippet represents one of the routes we created the mock-up for in the last devlog.
+It is a simple route that returns a list of tasks for a given user, based on a `uuid` query parameter.
+However, if the `uuid` parameter is not provided (and in the future if the `uuid` is not valid), we want to return some sort of error.
+Here we return a 400 error, which is the standard error code for a bad request.
+
+<CodeTitle name="tasks.py" language="python" />
+```python {9-10}
+from flask import request, abort, jsonify
+
+task_routes = Blueprint("tasks", __name__)
+
+@task_routes.route("/task-list")
+def get_task_list():
+    uuid = request.args.get("uuid")
+
+    if not uuid:
+        abort(400)
+    
+    return jsonify(uuid=uuid, tasks=tasks)
+```
+
+When we run this code, and try to access the route without the `uuid` parameter, we get the following:
+
+![400 Error](./images/posts/devlog-19/bad_request.png)
+
+While this error message is human-readable, it is not very code friendly.
+We can always check the status code of the response from the front end (and we should), but it would be nice to have a more code-friendly error message.
+To do this, we can use an error handler.
+
+To start, we will create a new file called `errors.py` and set up a blueprint for all our error handlers.
+
+<CodeTitle name="errors.py" language="python" />
+```python
+from flask import Blueprint
+
+errors = Blueprint("errors", __name__)
+```
+
+We will also register this blueprint to our app.
+
+<CodeTitle name="app.py" language="python" />
+```python {5}
+from flask import Flask
+from errors import errors
+
+app = Flask(__name__)
+app.register_blueprint(errors)
+
+if __name__ == "__main__":
+    app.run(debug=True)
+```
+
+Now, let's create an error handler that will catch the 400 error code across our entire app through `app_errorhandler`. 
+
+<CodeTitle name="errors.py" language="python" />
+```python {6-8}
+from flask import Blueprint, jsonify
+
+errors = Blueprint("errors", __name__)
+
+
+@errors.app_errorhandler(400)
+def bad_request(e):
+    return jsonify(status=400, error="Malformed Request"), 400
+```
+
+Now, when we try to access the route without the `uuid` parameter, we get the following:
+
+![400 Error](./images/posts/devlog-19/json_error.png)
+
+This is much more code friendly, and we can easily parse this error message in the frontend.
+We can create error handlers for all the other error codes as well, like 404, 500, etc.
+We could have also made this error handler from our `tasks.py` file to catch only the 400 error codes from that file, this time using `errorhandler` instead of `app_errorhandler`.
+
+<CodeTitle name="tasks.py" language="python" />
+```python
+@task_routes.errorhandler(400)
+...
+
+```
+
+And that's the basics of error handling in Flask. As mentioned, I hope that next week will be more eventful.
+
+Until then.
