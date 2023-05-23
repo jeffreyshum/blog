@@ -1,0 +1,200 @@
+---
+title: "Devlog #20 - Navigating in React Native"
+author: "Jeffrey Shum"
+description: "This week, we start working on the front-end React Native app starting with navigating between screens."
+originalDate: "2023-5-023EST"
+keywords: "devlog"
+category: "Devlogs"
+---
+
+In the last two weeks, we have developed a basic framework for the backend of our productivity app.
+This week, we will start working on the front end built with React Native so that we can have a means of interacting with the backend.
+
+# React Native
+
+React Native is a framework for building true native apps built on top of the React ecosystem.
+With React Native, you can build apps for iOS, Android, and the web all with the same codebase.
+The ideology is that you can write once and deploy your app wherever it needs to be.
+For web developers, React Native is a great way to get into mobile development without having to learn native languages like Swift or Java/Kotlin for iOS and Android respectively.
+
+To get started with React Native, we will use the [Expo quickstart](https://reactnative.dev/docs/environment-setup) provided by React Native.
+Expo is a set of tools and services that allow us to build, deploy, and quickly test our React Native apps.
+ 
+For TypeScript support, we will use the following command to create our project:
+    
+```bash
+npx create-expo-app --template
+```
+
+Let's also install additional packages that will allow us to easily navigate between different screens in our app:
+
+```bash
+npx expo install react-native-screens react-native-safe-area-context
+```
+
+From here, we can start building our app.
+
+# Simple Login Screen 
+
+Let's start by creating a simple login screen, the functionality of which we will implement later.
+
+<CodeTitle name="Login.tsx" language="react" />
+```tsx
+import { Pressable, Text } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+
+const Login = () => {
+	return (
+    // SafeAreaView is a View component that ensures that the content
+    // of our app is not hidden by the notch or any other system UI elements
+    // View components are React Native's equivalent of divs
+		<SafeAreaView>
+			<Pressable>
+				<Text>Login</Text>
+			</Pressable>
+		</SafeAreaView>
+	)
+}
+
+export default Login
+```
+
+Now, to add this screen to our app, we will create a `Stack` at the root of our app and add the `Login` screen to it.
+Let's also add some typing to our `Stack` so that we can pass in parameters to our screens later on.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx
+import { NavigationContainer } from "@react-navigation/native"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import Login from "./components/Login"
+
+export type RootStackParamList = {
+	Login: undefined
+}
+
+const Stack = createNativeStackNavigator<RootStackParamList>()
+
+const App = () => {
+	return (
+		<>
+			<NavigationContainer>
+				<Stack.Navigator
+					screenOptions={{
+						headerShown: false,
+					}}>
+					<Stack.Screen name="Login" component={Login} />
+				</Stack.Navigator>
+			</NavigationContainer>
+		</>
+	)
+}
+
+export default App
+```
+
+Now, we can run our app through Expo and see our login screen. However, we can't navigate out of it yet.
+
+# Navigating Between Screens
+
+To navigate between screens, we will take advantage of the `navigation` prop that is implicitly passed to all screens.
+This prop contains a `navigate` function that we can use to navigate to other screens.
+
+Since we are using TypeScript, we will need to add some typing to our `navigation` prop. Let's also add some styling to our login screen.
+
+<CodeTitle name="Login.tsx" language="react" />
+```tsx {3-4, 6, 8, 12, 20-33}
+import { Pressable, StyleSheet, Text } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { RootStackParamList } from "../App"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+
+type Props = NativeStackScreenProps<RootStackParamList, "Login">
+
+const Login = ({ navigation }: Props) => {
+	return (
+		<SafeAreaView style={styles.container}>
+			<Pressable
+				onPress={() => navigation.navigate("Home")}
+				style={styles.button}>
+				<Text>Login</Text>
+			</Pressable>
+		</SafeAreaView>
+	)
+}
+
+const styles = StyleSheet.create({
+	container: {
+		display: "flex",
+		height: "100%",
+		width: "100%",
+		alignItems: "center",
+		justifyContent: "center",
+	},
+
+	button: {
+		backgroundColor: "lime",
+		padding: 10,
+	},
+})
+
+export default Login
+```
+
+Now, let's create a basic home screen.
+
+<CodeTitle name="Home.tsx" language="react" />
+```tsx
+import { Text } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+
+const Home = () => {
+	return (
+		<SafeAreaView>
+			<Text>Home</Text>
+		</SafeAreaView>
+	)
+}
+
+export default Home
+```
+
+Now, we can add this screen to our `Stack` and test our navigation.
+
+<CodeTitle name="App.tsx" language="react" />
+```tsx {4, 8, 22}
+import { NavigationContainer } from "@react-navigation/native"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import Login from "./components/Login"
+import Home from "./components/Home"
+
+export type RootStackParamList = {
+	Login: undefined
+	Home: undefined
+}
+
+const Stack = createNativeStackNavigator<RootStackParamList>()
+
+const App = () => {
+	return (
+		<>
+			<NavigationContainer>
+				<Stack.Navigator
+					screenOptions={{
+						headerShown: false,
+					}}>
+					<Stack.Screen name="Login" component={Login} />
+					<Stack.Screen name="Home" component={Home} />
+				</Stack.Navigator>
+			</NavigationContainer>
+		</>
+	)
+}
+
+export default App
+```
+
+Now, when we press the login button we are taken to the home screen.
+
+And that's it! We now have a basic way to navigate between screens in our app. Next week, we will use this navigation to implement the functionality of our app.
+
+Until then.
