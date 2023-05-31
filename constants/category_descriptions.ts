@@ -6,7 +6,7 @@ export const categoryDescriptions: {
 	}
 } = {
 	Devlogs: {
-		description: "Weekly posts about my developer journey.",
+		description: "Posts about my developer journey.",
 		color: "#9AC8EB",
 		image: "/images/icons/categories/hash.png",
 	},
